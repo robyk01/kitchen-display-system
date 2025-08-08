@@ -12,7 +12,7 @@ def about():
 
 @app.route("/orders")
 def orders():
-    return "list of orders"
+    return "List of orders"
 
 if __name__ == "__main__":
     app.run(debug=True)
