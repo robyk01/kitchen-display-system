@@ -1,0 +1,8 @@
+<h1>Edit user {{ user.username }}</h1>
+<form method="POST">
+    <label for="username">Username</label>
+    <input type="text" id="username" name="username"><p>Old name: {{ user.username }}</p>
+    <label for="email">Email</label>
+    <input type="text" id="email" name="email"><p>Old email: {{ user.email }}</p><br>
+    <input type="submit">
+</form>
