@@ -18,7 +18,8 @@ class User(db.Model):
 
 @app.route("/")
 def home():
-    return "Hello World"
+    user = {'username': 'Roberto'}
+    return render_template('home.html', user=user)
 
 
 
@@ -42,21 +43,22 @@ def db_users():
     return render_template("db_users.html", users=users)
 
 
-@app.route("/edit_user/<int:user_id>", methods=['GET', 'POST'])
+@app.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)
 
-    if request.method == "POST":
-        user.username = request.form.get("username")
-        user.email = request.form.get("email")
+    if request.method == 'POST':
+        user.username = request.form.get('username')
+        user.email = request.form.get('email')
         db.session.commit()
         return redirect(url_for('db_users'))
+    return render_template('edit_user.html', user=user)
 
-    return render_template("edit_user.html", user = user)
 
-@app.route("/delete_user/<int:user_id>")
+@app.route('/delete_user/<int:user_id>', methods = ['POST'])
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
+
     db.session.delete(user)
     db.session.commit()
 
@@ -92,10 +94,6 @@ def order_detail(id):
 
 
 
-
-@app.route("/users/")
-def users():
-    return render_template("users.html", users = users_list)
 
 @app.route("/users/<string:username>")
 def user_page(username):
