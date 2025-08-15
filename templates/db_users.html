@@ -1,15 +1,22 @@
-<table border = 1 cellpadding="5" cellspacing="0" style="width:75%">
-    <tr style="background-color: #f0f0f0;">
-        <th>Username</th>
-        <th>Email</th>
-        <th>Actions</th>
-    </tr>
-    {% for user in users %}
-        <tr>
-            <td> {{ user.username }} </td>
-            <td> {{ user.email }} </td>
-            <td><a href="{{ url_for('edit_user', user_id=user.id) }}">Edit</a> <form action=" {{ url_for('delete_user', user_id = user.id) }}" method="POST"> <button type="submit" onclick="return confirm('Are you sure?')">Delete</button> </form></td>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="db-content">
+    <h2 class="db-title">User Database</h2>
+    <table class="db-users">
+        <tr class="db-header-row" style="background-color: #f0f0f0;">
+            <th>Username</th>
+            <th>Email</th>
+            <th>Actions</th>
         </tr>
-    {% endfor %}
-    </tr>
-</table>
+        {% for user in users %}
+            <tr class="db-row">
+                <td> {{ user.username }} </td>
+                <td> {{ user.email }} </td>
+                <td><a class="admin-button" href="{{ url_for('edit_user', user_id=user.id) }}">Edit</a> <form action=" {{ url_for('delete_user', user_id = user.id) }}" method="POST"> <button class="admin-button" type="submit" onclick="return confirm('Are you sure?')">Delete</button> </form></td>
+            </tr>
+        {% endfor %}
+    </table>
+    <a class="admin-button" id="add-user" href=" {{ url_for('register')}} ">Add user</a>
+</div>
+{% endblock %}

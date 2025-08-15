@@ -12,14 +12,26 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    orders = db.relationship('Order', backref='customer', lazy=True)
 
     def __repr__(self):
         return f"<User {self.username}>"
 
+class Order(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    items = db.Column(db.String(500), nullable=False)
+    total_price = db.Column(db.Float, nullable=False)
+
+    def __repr__(self):
+        return f"Order {self.id}"
+
 @app.route("/")
 def home():
     user = {'username': 'Roberto'}
-    return render_template('home.html', user=user)
+    user_count = User.query.count()
+    users = User.query.limit(5).all()
+    return render_template('home.html', user=user, user_count=user_count, users=users)
 
 
 
@@ -86,7 +98,7 @@ def contact():
 
 @app.route("/orders")
 def orders():
-    return "List of orders"
+    return render_template("orders.html")
 
 @app.route("/orders/<int:id>")
 def order_detail(id):

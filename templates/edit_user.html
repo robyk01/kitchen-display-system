@@ -1,8 +1,14 @@
-<h1>Edit user {{ user.username }}</h1>
-<form method="POST">
-    <label for="username">Username</label>
-    <input type="text" id="username" name="username"><p>Old name: {{ user.username }}</p>
-    <label for="email">Email</label>
-    <input type="text" id="email" name="email"><p>Old email: {{ user.email }}</p><br>
-    <input type="submit">
-</form>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="edit-content">
+    <h2>Edit user {{ user.username }}</h2>
+    <form class="edit-form" method="POST">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username"><p>Current name: {{ user.username }}</p>
+        <label for="email">Email</label>
+        <input type="text" id="email" name="email"><p>Current email: {{ user.email }}</p>
+        <input class="admin-button" id="edit-user-button" type="submit">
+    </form>
+</div>
+{% endblock %}

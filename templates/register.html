@@ -1,8 +1,15 @@
-<h1>Register</h1>
-<form method="POST">
-    <label for="username">Username</label>
-    <input type="text" id="username" name="username"><br>
-    <label for="email">Email</label>
-    <input type="email" name="email" id="email"><br><br>
-    <input type="submit" value="Submit">
-</form>
+{% extends "base.html" %}
+
+{% block content %}
+<div class="register-content">
+   <h2>Register</h2>
+    <form class="register-form" method="POST">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username">
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email">
+        <input class="admin-button" id="register-button" type="submit" value="Submit">
+    </form>
+</div>
+
+{% endblock %}

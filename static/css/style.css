@@ -9,6 +9,8 @@ body{
     line-height: 1.5;
 }
 
+/* base */
+
 .container{
     display: grid;
     grid-template-columns: 1fr 3fr;
@@ -50,7 +52,21 @@ nav.menu a:hover{
     color: steelblue;
 }
 
-.content{
+.admin-button{
+    font-size: 14px;
+    color: black;
+    background-color: #f3f3f3;
+    border-radius: 30px;
+    box-shadow: none;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+}
+
+/* home */
+
+.home-content{
     display: grid;
     grid-template-rows: auto 1fr;
     gap: 15px;
@@ -64,11 +80,141 @@ nav.menu a:hover{
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 20px;
+    align-items: start;
 }
 
 .card{
     background-color: white;
     padding: 15px;
     border-radius: 8px;
-    height: 100px;
+}
+
+.card h2{
+    margin-bottom: 5px;
+}
+
+.user-list{
+    list-style: none;
+    margin-bottom: 15px;
+}
+
+.user-list li{
+    padding: 5px 0px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 14px;
+}
+
+.user-count{
+    float: left;
+    padding: 5px 0px;
+    font-size: 14px;
+}
+
+#see-all-users{
+    float: right;
+}
+
+/* users database */
+
+.db-content{
+    display: grid;
+    grid-auto-rows: min-content;
+    gap: 15px;
+    margin: 15px;
+    align-items: start;
+}
+
+.db-users{
+    background-color: white;
+    border: 1px solid #c9c9c9;
+    border-spacing: 0px;
+    border-collapse: separate;
+    border-radius: 8px;
+}
+
+.db-users td, .db-users th{
+    padding: 15px;
+    border: 1px solid #c9c9c9
+}
+
+.db-users tr:first-child td:first-child {
+    border-top-left-radius: 8px;
+}
+.db-users tr:first-child td:last-child {
+    border-top-right-radius: 8px;
+}
+.db-users tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+}
+.db-users tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+}
+
+.db-users td:last-child{
+    display: flex;
+    justify-content: space-evenly;
+}
+
+#add-user{
+    background-color: white;
+    justify-self: end;
+}
+
+
+/* register */
+
+.register-content{
+    margin: 15px;
+}
+
+.register-content h2{
+    margin-bottom: 15px;
+}
+
+.register-form{
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    width: 50%;
+    padding: 15px;
+}
+
+.register-form input{
+    margin-bottom: 15px;
+    height: 24px;
+}
+
+#register-button{
+    height: 30px;
+}
+
+/* edit user */
+
+.edit-content{
+    margin: 15px;
+}
+
+.edit-content h2{
+    margin-bottom: 15px;
+}
+
+.edit-form{
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    width: 50%;
+    padding: 15px;
+}
+
+.edit-form input{
+    height: 24px;
+}
+
+.edit-form p{
+    margin-bottom: 15px;
+    font-size: 12px;
+}
+
+#edit-user-button{
+    height: 30px;
 }
