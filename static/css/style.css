@@ -114,6 +114,27 @@ nav.menu a:hover{
     float: right;
 }
 
+.order-list{
+    list-style: none;
+    margin-bottom: 15px;
+}
+
+.order-list li{
+    padding: 5px 0px;
+    border-bottom: 1px solid #f1f1f1;
+    font-size: 14px;
+}
+
+.order-count{
+    float: left;
+    font-size: 14px;
+    padding: 5px 0px;
+}
+
+#see-all-orders{
+    float: right;
+}
+
 /* users database */
 
 .db-content{
@@ -232,6 +253,13 @@ nav.menu a:hover{
     padding: 15px;
     border-radius: 8px;
     margin: 15px 0px;
+}
+
+.orders li{
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0px;
+    border-bottom: 1px solid #f1f1f1;
 }
 
 #add_order{

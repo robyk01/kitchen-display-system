@@ -5,6 +5,7 @@ from user_routes import users_bp
 from order_routes import orders_bp
 
 app = Flask(__name__)
+app.secret_key = 'secretkey'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -16,10 +17,14 @@ app.register_blueprint(orders_bp)
 
 @app.route("/")
 def home():
+    default_user = User.query.filter_by(email="roberto@gmail.com").first()
+
     user_count = User.query.count()
     users = User.query.limit(5).all()
-    default_user = User.query.filter_by(email="roberto@gmail.com").first()
-    return render_template('home.html', user=default_user, user_count=user_count, users=users)
+
+    order_count = Order.query.count()
+    orders = Order.query.limit(5).all()
+    return render_template('home.html', default_user=default_user, user_count=user_count, users=users, order_count=order_count, orders=orders)
 
 
 @app.route("/about")

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="edit-content">
+    <h2>Edit order {{ order.id }} of {{ order.user_id }}</h2>
+    <form class="edit-form" method="POST">
+        <label for="items">Items</label>
+        <input type="text" id="items" name="items"><p>Current items: {{ order.items }}</p>
+        <label for="total_price">Total Price</label>
+        <input type="text" id="total_price" name="total_price"><p>Current price: {{ order.total_price }}</p>
+        <input class="admin-button" id="edit-order-button" type="submit">
+    </form>
+</div>
+{% endblock %}
