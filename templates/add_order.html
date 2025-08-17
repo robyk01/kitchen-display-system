@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="add-order-content">
+    <h2>Add order</h2>
+    <form class="add-order-form" method="POST">
+        <label for="items">Items</label>
+        <input type="text" id="items" name="items">
+        <label for="total_price">Total Price</label>
+        <input type="text" name="total_price" id="total_price">
+        <input class="admin-button" type="submit" value="Submit">
+    </form>
+</div>
+{% endblock %}

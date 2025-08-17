@@ -22,7 +22,8 @@ def register():
 @users_bp.route("/db_users")
 def db_users():
     users = User.query.all()
-    return render_template("db_users.html", users=users)
+    default_user = User.query.filter_by(email="roberto@gmail.com").first()
+    return render_template("db_users.html", default_user=default_user, users=users)
 
 
 @users_bp.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])

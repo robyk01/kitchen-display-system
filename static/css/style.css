@@ -218,3 +218,22 @@ nav.menu a:hover{
 #edit-user-button{
     height: 30px;
 }
+
+
+/* orders */
+
+.orders-content{
+    margin: 15px;
+}
+
+.orders{
+    list-style: none;
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0px;
+}
+
+#add_order{
+    background-color: white;
+}

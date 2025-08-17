@@ -14,13 +14,12 @@ db.init_app(app)
 app.register_blueprint(users_bp)
 app.register_blueprint(orders_bp)
 
-
 @app.route("/")
 def home():
-    user = {'username': 'Roberto'}
     user_count = User.query.count()
     users = User.query.limit(5).all()
-    return render_template('home.html', user=user, user_count=user_count, users=users)
+    default_user = User.query.filter_by(email="roberto@gmail.com").first()
+    return render_template('home.html', user=default_user, user_count=user_count, users=users)
 
 
 @app.route("/about")

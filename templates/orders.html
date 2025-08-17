@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>List of all orders</h2>
+<div class="orders-content">
+    <h2>List of all orders</h2>
+    <ul class="orders">
+        {% for order in user.orders %}
+            <li>{{ order.items }} - {{ order.total_price }}</li>
+        {% endfor %}
+    </ul>
+    <a href=" {{ url_for('orders.add_order') }} " class="admin-button" id="add_order">Add order</a>
+</div>
 {% endblock %}
