@@ -4,17 +4,24 @@
 <div class="orders-content">
     <h2>List of all orders</h2>
     <ul class="orders">
-        {% for user in users %}
-            {% for order in user.orders %}
+            {% for order in orders %}
                 <li>
-                    <p>{{ user.username }}: {{ order.items }} - {{ order.total_price }}</p>
+                    <p>Order #{{ order.id }}</p>
+                    <p>Customer: {{ order.billing.first_name }} {{ order.billing.last_name }}</p>
+                    <p>Items:
+                        {% for product in order.line_items %}
+                            {{ product.name}}
+                        {% endfor %}
+                    </p>
+                    <p>Payment Method: {{ order.payment_method }}</p>
+                    <p>Status: {{ order.status }}</p>
+                    <p>Total: {{ order.total }} RON</p>
                     <div class="order-buttons">
                         <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button" id="edit_order">Edit order</a>
                         <form action=" {{ url_for('orders.delete_order', id = order.id) }}" method="POST"> <button class="admin-button" type="submit" onclick="return confirm('Are you sure?')">Delete order</button> </form>
                     </div>
                 </li>
             {% endfor %}
-        {% endfor %}
     </ul>
     <a href=" {{ url_for('orders.add_order') }} " class="admin-button" id="add_order">Add order</a>
 </div>
