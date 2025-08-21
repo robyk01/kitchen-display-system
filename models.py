@@ -1,19 +1,13 @@
 from extensions import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    orders = db.relationship('Order', backref='customer', lazy=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password_hash = db.Column(db.String(120), nullable=False)
 
-    def __repr__(self):
-        return f"<User {self.username}>"
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password, method="pbkdf2:sha256")
 
-class Order(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    items = db.Column(db.String(500), nullable=False)
-    total_price = db.Column(db.Float, nullable=False)
-
-    def __repr__(self):
-        return f"Order {self.id}"
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)

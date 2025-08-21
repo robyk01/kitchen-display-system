@@ -1,48 +1,48 @@
-from flask import render_template, request, redirect, url_for, Blueprint
-from extensions import db
-from models import User
+# from flask import render_template, request, redirect, url_for, Blueprint
+# from extensions import db
+# #from models import User
 
-users_bp = Blueprint('users', __name__)
-
-
-@users_bp.route("/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        username = request.form.get("username")
-        email = request.form.get("email")
-
-        new_user = User(username=username, email=email)
-        db.session.add(new_user)
-        db.session.commit()
-
-        return redirect(url_for(".db_users"))
-    return render_template("register.html")
+# users_bp = Blueprint('users', __name__)
 
 
-@users_bp.route("/db_users")
-def db_users():
-    users = User.query.all()
-    default_user = User.query.filter_by(email="roberto@gmail.com").first()
-    return render_template("db_users.html", default_user=default_user, users=users)
+# @users_bp.route("/register", methods=["GET", "POST"])
+# def register():
+#     if request.method == "POST":
+#         username = request.form.get("username")
+#         email = request.form.get("email")
+
+#         new_user = User(username=username, email=email)
+#         db.session.add(new_user)
+#         db.session.commit()
+
+#         return redirect(url_for(".db_users"))
+#     return "Register page"
 
 
-@users_bp.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
-def edit_user(user_id):
-    user = User.query.get_or_404(user_id)
-
-    if request.method == 'POST':
-        user.username = request.form.get('username')
-        user.email = request.form.get('email')
-        db.session.commit()
-        return redirect(url_for('.db_users'))
-    return render_template('edit_user.html', user=user)
+# @users_bp.route("/db_users")
+# def db_users():
+#     users = User.query.all()
+#     default_user = User.query.filter_by(email="roberto@gmail.com").first()
+#     return "User database"
 
 
-@users_bp.route('/delete_user/<int:user_id>', methods = ['POST'])
-def delete_user(user_id):
-    user = User.query.get_or_404(user_id)
+# @users_bp.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+# def edit_user(user_id):
+#     user = User.query.get_or_404(user_id)
 
-    db.session.delete(user)
-    db.session.commit()
+#     if request.method == 'POST':
+#         user.username = request.form.get('username')
+#         user.email = request.form.get('email')
+#         db.session.commit()
+#         return redirect(url_for('.db_users'))
+#     return "Edit user"
 
-    return redirect(url_for('.db_users'))
+
+# @users_bp.route('/delete_user/<int:user_id>', methods = ['POST'])
+# def delete_user(user_id):
+#     user = User.query.get_or_404(user_id)
+
+#     db.session.delete(user)
+#     db.session.commit()
+
+#     return redirect(url_for('.db_users'))

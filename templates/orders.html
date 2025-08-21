@@ -2,27 +2,64 @@
 
 {% block content %}
 <div class="orders-content">
-    <h2>List of all orders</h2>
-    <ul class="orders">
-            {% for order in orders %}
-                <li>
-                    <p>Order #{{ order.id }}</p>
-                    <p>Customer: {{ order.billing.first_name }} {{ order.billing.last_name }}</p>
-                    <p>Items:
+    <h2>Live orders</h2>
+    <table class="orders" id="live-orders">
+        <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+            {% for order in orders if order.status != "completed" %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.billing.first_name }} {{ order.billing.last_name }}</td>
+                    <td>
+                        {% for product in order.line_items %}
+                            {{ product.name }}
+                        {% endfor %}
+                    </td>
+                    <td>{{ order.payment_method }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>{{ order.total }} RON</td>
+                    <td class="order-buttons">
+                        <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button" id="edit_order">Edit order</a>
+                    </td>
+                </tr>
+            {% endfor %}
+    </table>
+
+    <h2>Completed orders</h2>
+    <table class="orders" id="completed-orders">
+        <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+            {% for order in orders if order.status == "completed" %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.billing.first_name }} {{ order.billing.last_name }}</td>
+                    <td>
                         {% for product in order.line_items %}
                             {{ product.name}}
                         {% endfor %}
-                    </p>
-                    <p>Payment Method: {{ order.payment_method }}</p>
-                    <p>Status: {{ order.status }}</p>
-                    <p>Total: {{ order.total }} RON</p>
-                    <div class="order-buttons">
+                    </td>
+                    <td>{{ order.payment_method }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>{{ order.total }} RON</td>
+                    <td class="order-buttons">
                         <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button" id="edit_order">Edit order</a>
-                        <form action=" {{ url_for('orders.delete_order', id = order.id) }}" method="POST"> <button class="admin-button" type="submit" onclick="return confirm('Are you sure?')">Delete order</button> </form>
-                    </div>
-                </li>
+                    </td>
+                </tr>
             {% endfor %}
-    </ul>
-    <a href=" {{ url_for('orders.add_order') }} " class="admin-button" id="add_order">Add order</a>
+    </table>
 </div>
 {% endblock %}

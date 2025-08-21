@@ -9,10 +9,6 @@
             <th>Email</th>
             <th>Actions</th>
         </tr>
-        <tr>
-            <td>{{ default_user.username }}</td>
-            <td>{{ default_user.email }}</td>
-        </tr>
         {% for us in users %}
             <tr class="db-row">
                 <td> {{ us.username }} </td>

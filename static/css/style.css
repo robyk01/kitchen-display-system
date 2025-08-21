@@ -5,21 +5,21 @@
 }
 
 body{
-    font-family: Arial, sans-serif;
+    font-family: 'Inter', 'Roboto', sans-serif;
     line-height: 1.5;
+    color: #1f2937
 }
 
 /* base */
 
 .container{
     display: grid;
-    grid-template-columns: 1fr 3fr;
+    grid-template-columns: 1fr 5fr;
     background-color: #f5f5f5;
     min-height: 100vh;
 }
 
 .header{
-    padding: 15px 0px 0px 15px;
     display: flex;
     flex-direction: column;
     background-color: white;
@@ -28,28 +28,54 @@ body{
 }
 
 .logo{
+    padding: 15px 0px 0px 15px;
     margin-bottom: 15px;
     font-size: 32px;
     font-weight: 700;
 }
 
 nav.menu{
+    margin: 5px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+}
+
+nav.menu div{
+    display: flex;
+    align-items: center;
+    padding: 15px 10px;
+    gap: 8px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;;
+}
+
+nav.menu div:hover{
+    background-color: #f5f5f5;
+}
+
+nav.menu a.active div{
+    background-color: #f5f5f5;
 }
 
 nav.menu a{
-    padding: 10px 10px;
-    margin: 0 10px 0 0;
     text-decoration: none;
-    color: #333;
-    border-radius: 8px;
 }
 
-nav.menu a:hover{
-    background-color: rgb(207, 219, 236);
-    color: steelblue;
+nav.menu div svg{
+    color: grey;
+}
+
+nav.menu a.active svg{
+    color: black;
+}
+
+nav.menu div p{
+    font-size: 14px;
+    color: grey;
+}
+
+nav.menu a.active p{
+    color: black;
 }
 
 .admin-button{
@@ -60,8 +86,51 @@ nav.menu a:hover{
     box-shadow: none;
     text-decoration: none;
     padding: 5px 10px;
+    min-height: 32px;
     border: none;
     cursor: pointer;
+}
+
+#logout-button{
+    text-align: center;
+    margin: auto 15px 15px 15px;
+}
+
+/* login */
+.login-wrapper{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+    background-color: #f5f5f5;
+}
+
+.login-form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 400px;
+    height: 400px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 40px -20px rgba(0,0,0,0.2);
+}
+
+.login-form h1{
+    margin-bottom: 30px;
+}
+
+.login-form input{
+    width: 50%;
+    height: 24px;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+#login-button{
+    margin-top: 15px;
 }
 
 /* home */
@@ -70,10 +139,7 @@ nav.menu a:hover{
     display: grid;
     grid-template-rows: auto 1fr;
     gap: 15px;
-    margin: 15px;
-}
-
-.hello{
+    margin: 30px;
 }
 
 .cards{
@@ -99,7 +165,7 @@ nav.menu a:hover{
 }
 
 .user-list li{
-    padding: 5px 0px;
+    padding: 15px 0px;
     border-bottom: 1px solid #f1f1f1;
     font-size: 14px;
 }
@@ -120,9 +186,17 @@ nav.menu a:hover{
 }
 
 .order-list li{
-    padding: 5px 0px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 15px 0px;
     border-bottom: 1px solid #f1f1f1;
     font-size: 14px;
+}
+
+.home-orders{
+    display: flex;
+    gap: 5px;
 }
 
 .order-count{
@@ -138,47 +212,47 @@ nav.menu a:hover{
 /* users database */
 
 .db-content{
-    display: grid;
-    grid-auto-rows: min-content;
-    gap: 15px;
-    margin: 15px;
-    align-items: start;
+    margin: 30px;
+}
+
+.db-content h2{
+    margin-bottom: 15px;
 }
 
 .db-users{
+    width: 100%;
     background-color: white;
-    border: 1px solid #c9c9c9;
     border-spacing: 0px;
     border-collapse: separate;
     border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0px 0px 40px -20px rgba(0,0,0,0.2);
 }
 
 .db-users td, .db-users th{
-    padding: 15px;
-    border: 1px solid #c9c9c9
+    padding: 5px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
 }
 
-.db-users tr:first-child td:first-child {
-    border-top-left-radius: 8px;
-}
-.db-users tr:first-child td:last-child {
-    border-top-right-radius: 8px;
-}
-.db-users tr:last-child td:first-child {
-    border-bottom-left-radius: 8px;
-}
-.db-users tr:last-child td:last-child {
-    border-bottom-right-radius: 8px;
+.db-users th{
+    background-color: #f5f5f5;
+    font-size: 14px;
+    text-transform: uppercase;
 }
 
 .db-users td:last-child{
     display: flex;
-    justify-content: space-evenly;
+    justify-content: center;
+    gap: 15px;
+}
+
+.db-users tr:last-child td{
+    border-bottom: none;
 }
 
 #add-user{
     background-color: white;
-    justify-self: end;
 }
 
 
@@ -211,11 +285,11 @@ nav.menu a:hover{
 
 /* edit user */
 
-.edit-content{
+.edit-user-content{
     margin: 15px;
 }
 
-.edit-content h2{
+.edit-user-content h2{
     margin-bottom: 15px;
 }
 
@@ -225,6 +299,7 @@ nav.menu a:hover{
     background-color: white;
     width: 50%;
     padding: 15px;
+    border-radius: 8px;
 }
 
 .edit-form input{
@@ -244,24 +319,107 @@ nav.menu a:hover{
 /* orders */
 
 .orders-content{
-    margin: 15px;
+    margin: 30px;
+}
+
+.orders-content h2{
+    margin-bottom: 15px;
 }
 
 .orders{
-    list-style: none;
+    width: 100%;
     background-color: white;
-    padding: 15px;
+    border-spacing: 0px;
+    border-collapse: separate;
     border-radius: 8px;
-    margin: 15px 0px;
+    box-shadow: 0px 0px 40px -20px rgba(0,0,0,0.2);
 }
 
-.orders li{
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0px;
-    border-bottom: 1px solid #f1f1f1;
+.orders td, .orders th{
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.orders th{
+    background-color: #f5f5f5;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.orders tr:last-child td{
+    border-bottom: none;
+}
+
+#live-orders{
+    margin-bottom: 30px;
 }
 
 #add_order{
     background-color: white;
+}
+
+
+/* edit order */
+
+.edit-order-content{
+    margin: 30px;
+}
+
+.edit-order-content h2{
+    margin-bottom: 15px;
+}
+
+.edit-order-form{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: white;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 40px -20px rgba(0,0,0,0.2);
+}
+
+.general-info, .billing-info, .shipping-info{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.edit-order-form p, label{
+    font-size: 14px;
+}
+
+.submit{
+    display: flex;
+    align-items: flex-end;
+}
+
+.order-items{
+    width: 100%;
+    background-color: white;
+    border-spacing: 0px;
+    border-collapse: separate;
+    border-radius: 8px;
+    box-shadow: 0px 0px 40px -20px rgba(0,0,0,0.2);
+}
+
+.order-items td, .orders-items th{
+    padding: 15px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.order-items th{
+    background-color: #f5f5f5;
+    padding: 15px;
+    font-size: 12px;
+    color: #535353;
+    text-transform: uppercase;
+}
+
+.order-items tr:last-child td{
+    border-bottom: none;
 }

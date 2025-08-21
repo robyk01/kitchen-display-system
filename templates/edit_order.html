@@ -1,13 +1,71 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="edit-content">
-    <h2>Edit order {{ order.id }} of {{ order.user_id }}</h2>
-    <form class="edit-form" method="POST">
-        <label for="status">Status</label>
-        <input type="text" id="status" name="status">
-        <p>Current status: {{ order.status }}</p>
-        <input class="admin-button" id="edit-order-button" type="submit">
+<div class="edit-order-content">
+    <h2>Edit order {{ order.id }} of {{ order.billing.first_name }}</h2>
+    <form class="edit-order-form" method="POST">
+
+        <div class="general-info">
+            <h3>General</h3>
+            <p>Date created: {{ order.date_created }}</p>
+            <div class="status">
+                <label for="status">Status</label>
+                <select name="status" id="status">
+                    {% set options = ["pending", "processing", "on-hold", "completed", "cancelled", "refunded", "failed", "trash"] %}
+                    {% for option in options %}
+                        <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+                <p>Current status: {{ order.status }}</p>
+            </div>
+        </div>
+
+        <div class="billing-info">
+            <h3>Billing</h3>
+            <p>First name: {{ order.billing.first_name }}</p>
+            <p>Last name: {{ order.billing.last_name }}</p>
+            <p>City: {{ order.billing.city }}</p>
+            <p>Address 1: {{ order.billing.address_1 }}</p>
+            <p>Address 2: {{ order.billing.address_2 }}</p>
+            <p>Email: {{ order.billing.email }}</p>
+            <p>Phone: {{ order.billing.phone }}</p>
+        </div>
+
+        <div class="shipping-info">
+            <h3>Shipping</h3>
+            <p>First name: {{ order.shipping.first_name }}</p>
+            <p>Last name: {{ order.shipping.last_name }}</p>
+            <p>City: {{ order.shipping.city }}</p>
+            <p>Address 1: {{ order.shipping.address_1 }}</p>
+            <p>Address 2: {{ order.shipping.address_2 }}</p>
+        </div>
+        
+        <div class="submit">
+            <input class="admin-button" id="edit-order-button" type="submit">
+        </div>
     </form>
+
+    <table class="order-items">
+        <tr>
+            <th>Item name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+        </tr>
+        {% for item in order.line_items %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.total }}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td></td>
+            <td></td>
+            <td>ORDER TOTAL:</td>
+            <td>{{ order.total }}</td>
+        </tr>
+    </table>
 </div>
 {% endblock %}

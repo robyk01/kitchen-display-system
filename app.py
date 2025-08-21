@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request
-from extensions import db
-from models import User, Order
-from user_routes import users_bp
+from flask import Flask, render_template, request, session, redirect, url_for
+from extensions import db, login_required
+from models import User
+#from user_routes import users_bp
 from order_routes import orders_bp
+from woo import wcapi
 
 app = Flask(__name__)
 app.secret_key = 'secretkey'
@@ -12,19 +13,45 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
-app.register_blueprint(users_bp)
 app.register_blueprint(orders_bp)
 
+@app.route('/login', methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        user = User.query.filter_by(username=username).first()
+        if user and user.check_password(password):
+            session['user_id'] = user.id
+            return redirect(url_for('.home'))
+        
+    return render_template("login.html")
+
+@app.route('/logout')
+def logout():
+    session.pop("user_id", None)
+    return redirect(url_for('.login'))
+
+
+
 @app.route("/")
+@login_required
 def home():
-    default_user = User.query.filter_by(email="roberto@gmail.com").first()
+    current_user = User.query.get(session.get("user_id"))
 
     user_count = User.query.count()
-    users = User.query.limit(5).all()
 
-    order_count = Order.query.count()
-    orders = Order.query.limit(5).all()
-    return render_template('home.html', default_user=default_user, user_count=user_count, users=users, order_count=order_count, orders=orders)
+    response = wcapi.get('orders')
+
+    if response.status_code == 200:
+        orders = response.json()
+    else:
+        return f"Error: {response.status_code}"
+    
+    order_count = len(orders)
+
+    return render_template('home.html', current_user=current_user, order_count=order_count, orders=orders)
 
 
 @app.route("/about")
