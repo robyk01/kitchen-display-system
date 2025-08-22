@@ -17,12 +17,18 @@
                 <tr>
                     <td>{{ order.id }}</td>
                     <td>{{ order.billing.first_name }} {{ order.billing.last_name }}</td>
-                    <td>
+                    <td class="order-items">
                         {% for product in order.line_items %}
-                            {{ product.name }}
+                            <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
                         {% endfor %}
                     </td>
-                    <td>{{ order.payment_method }}</td>
+                    <td>
+                        {% if order.payment_method == "cod" %}
+                            Cash on delivery
+                        {% elif order.payment_method == "bacs" %}
+                            Bank transfer
+                        {% endif %}
+                    </td>
                     <td>{{ order.status }}</td>
                     <td>{{ order.total }} RON</td>
                     <td class="order-buttons">
@@ -44,21 +50,27 @@
             <th>Actions</th>
         </tr>
             {% for order in orders if order.status == "completed" %}
-                <tr>
-                    <td>{{ order.id }}</td>
-                    <td>{{ order.billing.first_name }} {{ order.billing.last_name }}</td>
-                    <td>
-                        {% for product in order.line_items %}
-                            {{ product.name}}
-                        {% endfor %}
-                    </td>
-                    <td>{{ order.payment_method }}</td>
-                    <td>{{ order.status }}</td>
-                    <td>{{ order.total }} RON</td>
-                    <td class="order-buttons">
-                        <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button" id="edit_order">Edit order</a>
-                    </td>
-                </tr>
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.billing.first_name }} {{ order.billing.last_name }}</td>
+                <td class="order-items">
+                    {% for product in order.line_items %}
+                        <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if order.payment_method == "cod" %}
+                        Cash on delivery
+                    {% elif order.payment_method == "bacs" %}
+                        Bank transfer
+                    {% endif %}
+                </td>
+                <td>{{ order.status }}</td>
+                <td>{{ order.total }} RON</td>
+                <td class="order-buttons">
+                    <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button" id="edit_order">Edit order</a>
+                </td>
+            </tr>
             {% endfor %}
     </table>
 </div>
