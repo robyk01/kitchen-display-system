@@ -40,18 +40,22 @@ def logout():
 def home():
     current_user = User.query.get(session.get("user_id"))
 
-    user_count = User.query.count()
-
     response = wcapi.get('orders')
 
     if response.status_code == 200:
         orders = response.json()
+        order_count = response.headers.get('X-WP-Total', 0)
     else:
         return f"Error: {response.status_code}"
     
-    order_count = len(orders)
+    live = wcapi.get("orders", params={"status": "processing,on-hold"})
 
-    return render_template('home.html', current_user=current_user, order_count=order_count, orders=orders)
+    if live.status_code == 200:
+        live_orders_count = live.headers.get("X-WP-Total", 0)
+    else:
+        return f"Error: {live.status_code}"
+    
+    return render_template('home.html', current_user=current_user, order_count=order_count, live_orders_count=live_orders_count, orders=orders)
 
 
 @app.route("/about")

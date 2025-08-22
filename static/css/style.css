@@ -199,14 +199,9 @@ nav.menu a.active p{
     gap: 5px;
 }
 
-.order-count{
-    float: left;
-    font-size: 14px;
-    padding: 5px 0px;
-}
-
-#see-all-orders{
-    float: right;
+.orders-card-bottom{
+    display: flex;
+    justify-content: space-between;
 }
 
 /* users database */

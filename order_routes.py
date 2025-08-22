@@ -9,7 +9,7 @@ orders_bp = Blueprint('orders', __name__)
 @orders_bp.route("/orders")
 @login_required
 def show_orders():
-    response = wcapi.get("orders")
+    response = wcapi.get("orders", params={"orderby": "date", "order": "desc"})
     
     if response.status_code == 200:
         orders = response.json()
