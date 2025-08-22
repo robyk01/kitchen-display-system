@@ -1,10 +1,23 @@
 from flask import render_template, request, redirect, url_for, Blueprint
 from extensions import db
-#from models import User
+from models import Order
 from woo import wcapi
 from extensions import login_required
 
 orders_bp = Blueprint('orders', __name__)
+
+def sync_orders_from_woo(woo_orders):
+    for w in woo_orders:
+        existing = Order.query.filter_by(woo_order_id=w["id"]).first()
+        if not existing:
+            new_order = Order(
+                woo_order_id=w["id"],
+                customer_name=f"{w['billing']['first_name']} {w['billing']['last_name']}",
+                payment_method=w["payment_method"],
+                total=w["total"],
+                line_items=w["line_items"])
+            db.session.add(new_order)
+    db.session.commit()
 
 @orders_bp.route("/orders")
 @login_required
@@ -12,12 +25,30 @@ def show_orders():
     response = wcapi.get("orders", params={"orderby": "date", "order": "desc"})
     
     if response.status_code == 200:
-        orders = response.json()
+        woo_orders = response.json()
+        sync_orders_from_woo(woo_orders)
     else:
         return f"Error: {response.status_code}"
+    
+    in_kitchen = Order.query.filter_by(status="in_kitchen").all()
+    ready = Order.query.filter_by(status="ready").all()
+    delivered = Order.query.filter_by(status="delivered").all()
 
-    return render_template("orders.html", orders=orders)
+    return render_template("orders.html", in_kitchen=in_kitchen, ready=ready, delivered=delivered)
 
+@orders_bp.route('/update_status/<int:id>')
+@login_required
+def update_status(id):
+    order = Order.query.get(id)
+    if order.status == 'in_kitchen':
+        order.status = 'ready'
+    elif order.status == 'ready':
+        order.status = 'delivered'
+        data = {"status": "completed"}
+        wcapi.put(f"orders/{order.woo_order_id}", data).json()
+
+    db.session.commit()
+    return redirect(url_for('orders.show_orders'))
 
 @orders_bp.route('/edit_order/<int:id>', methods=["GET", "POST"])
 @login_required

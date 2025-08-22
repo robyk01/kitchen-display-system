@@ -13,46 +13,10 @@
             <th>Total</th>
             <th>Actions</th>
         </tr>
-            {% for order in orders if order.status != "completed" %}
-                <tr>
-                    <td>{{ order.id }}</td>
-                    <td>{{ order.billing.first_name }} {{ order.billing.last_name }}</td>
-                    <td class="order-items">
-                        {% for product in order.line_items %}
-                            <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
-                        {% endfor %}
-                    </td>
-                    <td>
-                        {% if order.payment_method == "cod" %}
-                            Cash on delivery
-                        {% elif order.payment_method == "bacs" %}
-                            Bank transfer
-                        {% endif %}
-                    </td>
-                    <td>{{ order.status }}</td>
-                    <td>{{ order.total }} RON</td>
-                    <td class="order-buttons">
-                        <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button" id="edit_order">Edit order</a>
-                    </td>
-                </tr>
-            {% endfor %}
-    </table>
-
-    <h2>Completed orders</h2>
-    <table class="orders" id="completed-orders">
-        <tr>
-            <th>#</th>
-            <th>Customer</th>
-            <th>Items</th>
-            <th>Payment Method</th>
-            <th>Status</th>
-            <th>Total</th>
-            <th>Actions</th>
-        </tr>
-            {% for order in orders if order.status == "completed" %}
+            {% for order in in_kitchen %}
             <tr>
                 <td>{{ order.id }}</td>
-                <td>{{ order.billing.first_name }} {{ order.billing.last_name }}</td>
+                <td>{{ order.customer_name }}</td>
                 <td class="order-items">
                     {% for product in order.line_items %}
                         <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
@@ -68,6 +32,44 @@
                 <td>{{ order.status }}</td>
                 <td>{{ order.total }} RON</td>
                 <td class="order-buttons">
+                    <a href=" {{ url_for('orders.update_status', id=order.id) }} " class="admin-button">Update status</a>
+                    <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button" id="edit_order">Edit order</a>
+                </td>
+            </tr>
+            {% endfor %}
+    </table>
+
+    <h2>Completed orders</h2>
+    <table class="orders" id="completed-orders">
+        <tr>
+            <th>#</th>
+            <th>Customer</th>
+            <th>Items</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Actions</th>
+        </tr>
+            {% for order in ready %}
+            <tr>
+                <td>{{ order.id }}</td>
+                <td>{{ order.customer_name }}</td>
+                <td class="order-items">
+                    {% for product in order.line_items %}
+                        <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if order.payment_method == "cod" %}
+                        Cash on delivery
+                    {% elif order.payment_method == "bacs" %}
+                        Bank transfer
+                    {% endif %}
+                </td>
+                <td>{{ order.status }}</td>
+                <td>{{ order.total }} RON</td>
+                <td class="order-buttons">
+                    <a href=" {{ url_for('orders.update_status', id=order.id) }} " class="admin-button">Update status</a>
                     <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button" id="edit_order">Edit order</a>
                 </td>
             </tr>
