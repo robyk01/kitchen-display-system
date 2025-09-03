@@ -351,8 +351,16 @@ nav.menu a.active p{
     color: grey;
 }
 
+.order-delivery-date{
+    font-weight: 700;
+}
+
 #live-orders{
     margin-bottom: 30px;
+}
+
+.order-alert{
+    background-color: orange;
 }
 
 #add_order{

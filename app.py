@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from extensions import db, login_required
+from flask_migrate import Migrate
 from models import User
 #from user_routes import users_bp
 from order_routes import orders_bp
@@ -12,6 +13,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+
+migrate = Migrate(app, db)
 
 app.register_blueprint(orders_bp)
 

@@ -25,5 +25,8 @@ class Order(db.Model):
 
     customer_name = db.Column(db.String(120))
     payment_method = db.Column(db.String(50))
+    delivery_method = db.Column(db.String(50))
+    delivery_date = db.Column(db.String(12))
+    delivery_time_slot = db.Column(db.String(50))
     total = db.Column(db.Numeric(10, 2))
     line_items = db.Column(db.JSON)

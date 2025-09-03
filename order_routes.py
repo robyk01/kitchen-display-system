@@ -3,21 +3,43 @@ from extensions import db
 from models import Order
 from woo import wcapi
 from extensions import login_required
+from datetime import date
 
 orders_bp = Blueprint('orders', __name__)
 
 def sync_orders_from_woo(woo_orders):
     for w in woo_orders:
+        delivery_type = get_order_meta(w, "_delivery_type")
+        delivery_date = get_order_meta(w, "_delivery_date_slot")
+        delivery_time_slot = get_order_meta(w, "_delivery_time_slot_id")
+
         existing = Order.query.filter_by(woo_order_id=w["id"]).first()
         if not existing:
             new_order = Order(
                 woo_order_id=w["id"],
                 customer_name=f"{w['billing']['first_name']} {w['billing']['last_name']}",
                 payment_method=w["payment_method"],
+                delivery_method=delivery_type,
+                delivery_date=delivery_date,
+                delivery_time_slot=delivery_time_slot,
                 total=w["total"],
                 line_items=w["line_items"])
             db.session.add(new_order)
+        else:
+            existing.payment_method=w["payment_method"]
+            existing.delivery_method=delivery_type
+            existing.delivery_date=delivery_date
+            existing.delivery_time_slot=delivery_time_slot
+            existing.total=w["total"]
+            existing.line_items=w["line_items"]
     db.session.commit()
+
+def get_order_meta(order, key):
+    for meta in order.get("meta_data", []):
+        if meta["key"] == key:
+            return meta["value"]
+    return None
+
 
 @orders_bp.route("/orders")
 @login_required
@@ -34,7 +56,10 @@ def show_orders():
     ready = Order.query.filter_by(status="ready").all()
     delivered = Order.query.filter_by(status="delivered").all()
 
-    return render_template("orders.html", in_kitchen=in_kitchen, ready=ready, delivered=delivered)
+    today_date = date.today().isoformat()
+
+    return render_template("orders.html", in_kitchen=in_kitchen, ready=ready, delivered=delivered, today_date=today_date)
+
 
 @orders_bp.route('/update_status/<int:id>')
 @login_required

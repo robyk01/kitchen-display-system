@@ -9,6 +9,8 @@
             <th>Customer</th>
             <th>Items</th>
             <th>Payment Method</th>
+            <th>Delivery Method</th>
+            <th>Delivery Date</th>
             <th>Status</th>
             <th>Total</th>
             <th>Actions</th>
@@ -29,6 +31,11 @@
                         Bank transfer
                     {% endif %}
                 </td>
+                <td><p class="order-delivery-method">{{ order.delivery_method }}</p></td>
+                <td>
+                    <p class="order-delivery-date">{{ order.delivery_date }}</p>
+                    {{ order.delivery_time_slot }}
+                </td>
                 <td>{{ order.status }}</td>
                 <td>{{ order.total }} RON</td>
                 <td class="order-buttons">
@@ -46,12 +53,14 @@
             <th>Customer</th>
             <th>Items</th>
             <th>Payment Method</th>
+            <th>Delivery Method</th>
+            <th>Delivery Date</th>
             <th>Status</th>
             <th>Total</th>
             <th>Actions</th>
         </tr>
             {% for order in ready %}
-            <tr>
+            <tr class="{% if order.delivery_date == today_date %}order-alert{% endif %}">
                 <td>{{ order.id }}</td>
                 <td>{{ order.customer_name }}</td>
                 <td class="order-items">
@@ -65,6 +74,11 @@
                     {% elif order.payment_method == "bacs" %}
                         Bank transfer
                     {% endif %}
+                </td>
+                <td><p class="order-delivery-method">{{ order.delivery_method }}</p></td>
+                <td>
+                    <p class="order-delivery-date">{{ order.delivery_date }}</p>
+                    {{ order.delivery_time_slot }}
                 </td>
                 <td>{{ order.status }}</td>
                 <td>{{ order.total }} RON</td>
