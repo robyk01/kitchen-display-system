@@ -359,9 +359,14 @@ nav.menu a.active p{
     margin-bottom: 30px;
 }
 
-.order-alert{
-    background-color: orange;
+.soon-order {
+    background-color: #FFF8E1;
 }
+
+.late-order {
+    background-color: #FFEBEE;
+}
+
 
 #add_order{
     background-color: white;

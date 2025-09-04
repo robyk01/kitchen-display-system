@@ -2,16 +2,19 @@
 
 {% block content %}
 <div class="edit-order-content">
-    <h2>Edit order {{ order.id }} of {{ order.billing.first_name }}</h2>
+    <h2>Edit order {{ order.id }} of {{ order.customer_name }}</h2>
     <form class="edit-order-form" method="POST">
 
         <div class="general-info">
             <h3>General</h3>
-            <p>Date created: {{ order.date_created }}</p>
+            <p>Delivery method: {{ order.delivery_method }}</p>
+            <p>Delivery date: {{ order.delivery_date }}</p>
+            <p>Delivery time slot: {{ order.time_slot_start_time }} - {{ order.time_slot_end_time}}</p>
+            <p>Delivery fee: {{ order.time_slot_fee }} RON</p>
             <div class="status">
                 <label for="status">Status</label>
                 <select name="status" id="status">
-                    {% set options = ["pending", "processing", "on-hold", "completed", "cancelled", "refunded", "failed", "trash"] %}
+                    {% set options = ["In kitchen", "Ready", "Delivered"] %}
                     {% for option in options %}
                         <option value="{{ option }}">{{ option }}</option>
                     {% endfor %}
@@ -20,24 +23,10 @@
             </div>
         </div>
 
-        <div class="billing-info">
-            <h3>Billing</h3>
-            <p>First name: {{ order.billing.first_name }}</p>
-            <p>Last name: {{ order.billing.last_name }}</p>
-            <p>City: {{ order.billing.city }}</p>
-            <p>Address 1: {{ order.billing.address_1 }}</p>
-            <p>Address 2: {{ order.billing.address_2 }}</p>
-            <p>Email: {{ order.billing.email }}</p>
-            <p>Phone: {{ order.billing.phone }}</p>
-        </div>
-
         <div class="shipping-info">
             <h3>Shipping</h3>
-            <p>First name: {{ order.shipping.first_name }}</p>
-            <p>Last name: {{ order.shipping.last_name }}</p>
-            <p>City: {{ order.shipping.city }}</p>
-            <p>Address 1: {{ order.shipping.address_1 }}</p>
-            <p>Address 2: {{ order.shipping.address_2 }}</p>
+            <p>Customer name: {{ order.customer_name }}</p>
+            <p>Payment method: {{ order.payment_method }}</p>
         </div>
         
         <div class="submit">
@@ -57,14 +46,22 @@
                 <td>{{ item.name }}</td>
                 <td>{{ item.price }}</td>
                 <td>{{ item.quantity }}</td>
-                <td>{{ item.total }}</td>
+                <td>{{ item.total }} RON</td>
             </tr>
         {% endfor %}
+        {% if order.time_slot_fee  %}
+            <tr>
+                <td></td>
+                <td></td>
+                <td>Delivery fee:</td>
+                <td>{{ order.time_slot_fee }} RON</td>
+            </tr>
+        {% endif %}
         <tr>
             <td></td>
             <td></td>
             <td>ORDER TOTAL:</td>
-            <td>{{ order.total }}</td>
+            <td>{{ order.total }} RON</td>
         </tr>
     </table>
 </div>

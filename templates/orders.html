@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends base %}
 
 {% block content %}
 <div class="orders-content">
@@ -34,7 +34,7 @@
                 <td><p class="order-delivery-method">{{ order.delivery_method }}</p></td>
                 <td>
                     <p class="order-delivery-date">{{ order.delivery_date }}</p>
-                    {{ order.delivery_time_slot }}
+                    {{ order.time_slot_start_time }} - {{ order.time_slot_end_time }}
                 </td>
                 <td>{{ order.status }}</td>
                 <td>{{ order.total }} RON</td>
@@ -60,7 +60,7 @@
             <th>Actions</th>
         </tr>
             {% for order in ready %}
-            <tr class="{% if order.delivery_date == today_date %}order-alert{% endif %}">
+            <tr class=" {% if order in soon_orders %}soon-order{% elif order in late_orders %}late-order{% endif %}">
                 <td>{{ order.id }}</td>
                 <td>{{ order.customer_name }}</td>
                 <td class="order-items">
@@ -78,7 +78,7 @@
                 <td><p class="order-delivery-method">{{ order.delivery_method }}</p></td>
                 <td>
                     <p class="order-delivery-date">{{ order.delivery_date }}</p>
-                    {{ order.delivery_time_slot }}
+                    {{ order.time_slot_start_time }} - {{ order.time_slot_end_time }}
                 </td>
                 <td>{{ order.status }}</td>
                 <td>{{ order.total }} RON</td>

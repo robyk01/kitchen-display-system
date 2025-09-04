@@ -12,3 +12,13 @@ def login_required(f):
         
         return f(*args, **kwargs)
     return decorated_function
+
+def role_required(required_role):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'role' not in session or session['role'] != required_role:
+                return redirect(url_for('login'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator

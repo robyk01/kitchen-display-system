@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from extensions import db, login_required
+from extensions import db, login_required, role_required
 from flask_migrate import Migrate
 from models import User
 #from user_routes import users_bp
@@ -27,7 +27,12 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and user.check_password(password):
             session['user_id'] = user.id
-            return redirect(url_for('.home'))
+            session['role'] = user.role
+
+            if session['role'] == 'admin':
+                return redirect(url_for('.home'))
+            else:
+                return redirect(url_for('orders.show_orders'))
         
     return render_template("login.html")
 
@@ -40,7 +45,13 @@ def logout():
 
 @app.route("/")
 @login_required
+@role_required('admin')
 def home():
+    if session['role'] == 'admin':
+        base = 'admin_base.html'
+    else:
+        base = 'user_base.html'
+
     current_user = User.query.get(session.get("user_id"))
 
     response = wcapi.get('orders')
@@ -58,7 +69,7 @@ def home():
     else:
         return f"Error: {live.status_code}"
     
-    return render_template('home.html', current_user=current_user, order_count=order_count, live_orders_count=live_orders_count, orders=orders)
+    return render_template('home.html', base=base, current_user=current_user, order_count=order_count, live_orders_count=live_orders_count, orders=orders)
 
 
 @app.route("/about")
