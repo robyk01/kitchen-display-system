@@ -1,7 +1,8 @@
-{% extends base %}
+{% extends "base.html" %}
 
 {% block content %}
 <div class="orders-content">
+    {% include "header.html" %}
     <h2>Live orders</h2>
     <table class="orders" id="live-orders">
         <tr>

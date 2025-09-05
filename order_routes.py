@@ -61,11 +61,6 @@ def get_order_meta(order, key):
 @orders_bp.route("/orders")
 @login_required
 def show_orders():
-    if session['role'] == 'admin':
-        base = 'admin_base.html'
-    else:
-        base = 'user_base.html'
-
     response = wcapi.get("orders", params={"orderby": "date", "order": "desc"})
     
     if response.status_code == 200:
@@ -99,8 +94,7 @@ def show_orders():
         elif order.status == 'ready' and order.delivery_date == today and now >= end_dt:
             late_orders.append(order) # red alert
 
-    return render_template("orders.html", base=base, in_kitchen=in_kitchen, ready=ready, delivered=delivered, soon_orders=soon_orders, late_orders=late_orders)
-
+    return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, delivered=delivered, soon_orders=soon_orders, late_orders=late_orders)
 
 @orders_bp.route('/update_status/<int:id>')
 @login_required

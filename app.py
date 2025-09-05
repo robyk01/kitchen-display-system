@@ -4,7 +4,10 @@ from flask_migrate import Migrate
 from models import User
 #from user_routes import users_bp
 from order_routes import orders_bp
+from user_routes import users_bp
 from woo import wcapi
+from datetime import datetime
+
 
 app = Flask(__name__)
 app.secret_key = 'secretkey'
@@ -17,6 +20,23 @@ db.init_app(app)
 migrate = Migrate(app, db)
 
 app.register_blueprint(orders_bp)
+app.register_blueprint(users_bp)
+
+def role_injection():
+    return dict(role = session.get("role"))
+
+def clock_injection():
+    return dict(clock = datetime.now().strftime("%H:%M"))
+
+def user_injection():
+    curr_user = None
+    if 'user_id' in session:
+        curr_user = User.query.get(session.get('user_id')).username
+    return dict(curr_user = curr_user)
+
+app.context_processor(role_injection)
+app.context_processor(clock_injection)
+app.context_processor(user_injection)
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -47,11 +67,6 @@ def logout():
 @login_required
 @role_required('admin')
 def home():
-    if session['role'] == 'admin':
-        base = 'admin_base.html'
-    else:
-        base = 'user_base.html'
-
     current_user = User.query.get(session.get("user_id"))
 
     response = wcapi.get('orders')
@@ -69,7 +84,9 @@ def home():
     else:
         return f"Error: {live.status_code}"
     
-    return render_template('home.html', base=base, current_user=current_user, order_count=order_count, live_orders_count=live_orders_count, orders=orders)
+    users = User.query.limit(10).all()
+    
+    return render_template('home.html', page=f"Hello, {current_user.username}", current_user=current_user, order_count=order_count, live_orders_count=live_orders_count, orders=orders, users=users, user_count=len(users))
 
 
 @app.route("/about")

@@ -2,17 +2,17 @@
 
 {% block content %}
 <div class="db-content">
-    <h2 class="db-title">User Database</h2>
+    {% include "header.html" %}
     <table class="db-users">
         <tr class="db-header-row" style="background-color: #f0f0f0;">
             <th>Username</th>
-            <th>Email</th>
+            <th>Role</th>
             <th>Actions</th>
         </tr>
         {% for us in users %}
             <tr class="db-row">
                 <td> {{ us.username }} </td>
-                <td> {{ us.email }} </td>
+                <td> {{ us.role }}</td>
                 <td>
                     <a class="admin-button" href="{{ url_for('users.edit_user', user_id=us.id) }}">Edit</a>
                     <form action=" {{ url_for('users.delete_user', user_id = us.id) }}" method="POST"> <button class="admin-button" type="submit" onclick="return confirm('Are you sure?')">Delete</button> </form>
@@ -20,6 +20,6 @@
             </tr>
         {% endfor %}
     </table>
-    <a class="admin-button" id="add-user" href=" {{ url_for('users.register')}} ">Add user</a>
+    
 </div>
 {% endblock %}

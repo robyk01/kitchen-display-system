@@ -1,12 +1,10 @@
-{% extends base %}
+{% extends "base.html" %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
 <div class="home-content">
-    <div class="hello">
-        <h1>Hello, {{ current_user.username }}!</h1>
-    </div>
+    {% include "header.html" %}
     <div class="cards">
         <div class="card" id="orders-card">
             <h2>Orders</h2>
@@ -30,15 +28,15 @@
             </div>
         </div>
 
-        <!-- <div class="card" id="users-card">
+        <div class="card" id="users-card">
             <h2>Users</h2>
             <ul class="user-list">
                 {% for us in users %}
-                    <li>{{ us.username }}</li>
+                    <li>{{ us.username }} - Role: {{ us.role }}</li>
                 {% endfor %}
             </ul>
             <p class="user-count">User count: {{ user_count }}</p>
-        </div> -->
+        </div>
 
     </div>
 </div>
