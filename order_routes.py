@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, Blueprint, session
 from extensions import db
-from models import Order
+from models import Order, User
 from woo import wcapi
 from extensions import login_required
 from datetime import datetime, date, timedelta
@@ -61,6 +61,9 @@ def get_order_meta(order, key):
 @orders_bp.route("/orders")
 @login_required
 def show_orders():
+    user = User.query.get(session.get('user_id'))
+    settings = user.settings
+
     response = wcapi.get("orders", params={"orderby": "date", "order": "desc"})
     
     if response.status_code == 200:
@@ -71,7 +74,6 @@ def show_orders():
     
     in_kitchen = Order.query.filter_by(status="in_kitchen").all()
     ready = Order.query.filter_by(status="ready").all()
-    delivered = Order.query.filter_by(status="delivered").all()
 
     soon_orders = []
     late_orders = []
@@ -94,7 +96,7 @@ def show_orders():
         elif order.status == 'ready' and order.delivery_date == today and now >= end_dt:
             late_orders.append(order) # red alert
 
-    return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, delivered=delivered, soon_orders=soon_orders, late_orders=late_orders)
+    return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, soon_orders=soon_orders, late_orders=late_orders, settings=settings)
 
 @orders_bp.route('/update_status/<int:id>')
 @login_required

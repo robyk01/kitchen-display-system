@@ -7,38 +7,60 @@
     <table class="orders" id="live-orders">
         <tr>
             <th>#</th>
-            <th>Customer</th>
-            <th>Items</th>
-            <th>Payment Method</th>
-            <th>Delivery Method</th>
-            <th>Delivery Date</th>
-            <th>Status</th>
-            <th>Total</th>
+            {% if settings.show_customer %}<th>Customer</th>{% endif %}
+            {% if settings.show_items %}<th>Items</th>{% endif %}
+            {% if settings.show_payment_method %}<th>Payment Method</th>{% endif %}
+            {% if settings.show_delivery_method %}<th>Delivery Method</th>{% endif %}
+            {% if settings.show_delivery_date %}<th>Delivery Date</th>{% endif %}
+            {% if settings.show_status %}<th>Status</th>{% endif %}
+            {% if settings.show_total %}<th>Total</th>{% endif %}
             <th>Actions</th>
         </tr>
             {% for order in in_kitchen %}
             <tr>
                 <td>{{ order.id }}</td>
-                <td>{{ order.customer_name }}</td>
-                <td class="order-items">
-                    {% for product in order.line_items %}
-                        <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
-                    {% endfor %}
-                </td>
-                <td>
-                    {% if order.payment_method == "cod" %}
-                        Cash on delivery
-                    {% elif order.payment_method == "bacs" %}
-                        Bank transfer
-                    {% endif %}
-                </td>
-                <td><p class="order-delivery-method">{{ order.delivery_method }}</p></td>
-                <td>
-                    <p class="order-delivery-date">{{ order.delivery_date }}</p>
-                    {{ order.time_slot_start_time }} - {{ order.time_slot_end_time }}
-                </td>
-                <td>{{ order.status }}</td>
-                <td>{{ order.total }} RON</td>
+
+                {% if settings.show_customer %}
+                    <td>{{ order.customer_name }}</td>
+                {% endif %}
+
+                {% if settings.show_items %}
+                    <td class="order-items">
+                        {% for product in order.line_items %}
+                            <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
+                        {% endfor %}
+                    </td>
+                {% endif %}
+
+                {% if settings.show_payment_method %}
+                    <td>
+                        {% if order.payment_method == "cod" %}
+                            Cash on delivery
+                        {% elif order.payment_method == "bacs" %}
+                            Bank transfer
+                        {% endif %}
+                    </td>
+                {% endif %}
+
+                {% if settings.show_delivery_method %}
+                    <td><p class="order-delivery-method">{{ order.delivery_method }}</p></td>
+                {% endif %}
+
+                {% if settings.show_delivery_date %}
+                    <td>
+                        <p class="order-delivery-date">{{ order.delivery_date }}</p>
+                        {{ order.time_slot_start_time }} - {{ order.time_slot_end_time }}
+                    </td>
+                {% endif %}
+
+                {% if settings.show_status %}
+                    <td>{{ order.status }}</td>
+                {% endif %}
+                
+                {% if settings.show_total %}
+                    <td>{{ order.total }} RON</td>
+                {% endif %}
+
                 <td class="order-buttons">
                     <a href=" {{ url_for('orders.update_status', id=order.id) }} " class="admin-button">Update status</a>
                     <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button" id="edit_order">Edit order</a>
@@ -51,38 +73,60 @@
     <table class="orders" id="completed-orders">
         <tr>
             <th>#</th>
-            <th>Customer</th>
-            <th>Items</th>
-            <th>Payment Method</th>
-            <th>Delivery Method</th>
-            <th>Delivery Date</th>
-            <th>Status</th>
-            <th>Total</th>
+            {% if settings.show_customer %}<th>Customer</th>{% endif %}
+            {% if settings.show_items %}<th>Items</th>{% endif %}
+            {% if settings.show_payment_method %}<th>Payment Method</th>{% endif %}
+            {% if settings.show_delivery_method %}<th>Delivery Method</th>{% endif %}
+            {% if settings.show_delivery_date %}<th>Delivery Date</th>{% endif %}
+            {% if settings.show_status %}<th>Status</th>{% endif %}
+            {% if settings.show_total %}<th>Total</th>{% endif %}
             <th>Actions</th>
         </tr>
             {% for order in ready %}
             <tr class=" {% if order in soon_orders %}soon-order{% elif order in late_orders %}late-order{% endif %}">
                 <td>{{ order.id }}</td>
-                <td>{{ order.customer_name }}</td>
-                <td class="order-items">
-                    {% for product in order.line_items %}
-                        <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
-                    {% endfor %}
-                </td>
-                <td>
-                    {% if order.payment_method == "cod" %}
-                        Cash on delivery
-                    {% elif order.payment_method == "bacs" %}
-                        Bank transfer
-                    {% endif %}
-                </td>
-                <td><p class="order-delivery-method">{{ order.delivery_method }}</p></td>
-                <td>
-                    <p class="order-delivery-date">{{ order.delivery_date }}</p>
-                    {{ order.time_slot_start_time }} - {{ order.time_slot_end_time }}
-                </td>
-                <td>{{ order.status }}</td>
-                <td>{{ order.total }} RON</td>
+
+                {% if settings.show_customer %}
+                    <td>{{ order.customer_name }}</td>
+                {% endif %}
+
+                {% if settings.show_items %}
+                    <td class="order-items">
+                        {% for product in order.line_items %}
+                            <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
+                        {% endfor %}
+                    </td>
+                {% endif %}
+
+                {% if settings.show_payment_method %}
+                    <td>
+                        {% if order.payment_method == "cod" %}
+                            Cash on delivery
+                        {% elif order.payment_method == "bacs" %}
+                            Bank transfer
+                        {% endif %}
+                    </td>
+                {% endif %}
+
+                {% if settings.show_delivery_method %}
+                    <td><p class="order-delivery-method">{{ order.delivery_method }}</p></td>
+                {% endif %}
+
+                {% if settings.show_delivery_date %}
+                    <td>
+                        <p class="order-delivery-date">{{ order.delivery_date }}</p>
+                        {{ order.time_slot_start_time }} - {{ order.time_slot_end_time }}
+                    </td>
+                {% endif %}
+
+                {% if settings.show_status %}
+                    <td>{{ order.status }}</td>
+                {% endif %}
+                
+                {% if settings.show_total %}
+                    <td>{{ order.total }} RON</td>
+                {% endif %}
+
                 <td class="order-buttons">
                     <a href=" {{ url_for('orders.update_status', id=order.id) }} " class="admin-button">Update status</a>
                     <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button" id="edit_order">Edit order</a>

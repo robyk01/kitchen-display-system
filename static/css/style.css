@@ -485,3 +485,10 @@ nav.menu a.active p{
 .edit-order-items tr:last-child td{
     border-bottom: none;
 }
+
+
+/* settings */
+
+.settings-content{
+    margin: 30px;
+}

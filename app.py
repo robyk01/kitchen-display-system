@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for
 from extensions import db, login_required, role_required
 from flask_migrate import Migrate
-from models import User
+from models import User, Settings
 #from user_routes import users_bp
 from order_routes import orders_bp
 from user_routes import users_bp
@@ -89,23 +89,24 @@ def home():
     return render_template('home.html', page=f"Hello, {current_user.username}", current_user=current_user, order_count=order_count, live_orders_count=live_orders_count, orders=orders, users=users, user_count=len(users))
 
 
-@app.route("/about")
-def about():
-    return "This is the kitchen display system"
+@app.route("/settings", methods=["GET", "POST"])
+@login_required
+def settings():
+    user = User.query.get_or_404(session.get('user_id'))
 
+    if not user.settings:
+        user.settings = Settings()
+        db.session.commit()
 
+    settings = user.settings
 
-@app.route("/contact", methods=["GET", "POST"])
-def contact():
-    if request.method == "POST":
-        message = request.form.get("message")
-    else:
-        message = request.args.get("message")
-    
-    if message:
-        return "Thank you!"
-    return render_template("contact.html")
+    if request.method == 'POST':
+        for field in ['show_customer', 'show_items', 'show_payment_method', 'show_delivery_method', 'show_delivery_date', 'show_status', 'show_total']:
+            setattr(settings, field, bool(request.form.get(field)))
 
+        db.session.commit()
+
+    return render_template("settings.html", page="Settings", settings=settings, getattr=getattr)
 
 
 @app.route("/users/<string:username>")
