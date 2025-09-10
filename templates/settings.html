@@ -3,26 +3,34 @@
 {% block content %}
 <div class="settings-content">
     {% include "header.html" %}
-    <div class="settings-tabs">
-        <button class="tab-button" onclick="openTab('general')">General</button>
-        <button class="tab-button" onclick="openTab('display')">Display</button>
+    <div class="settings-tab-buttons">
+        <button class="tab-button" id="general-button" onclick="openTab('general')">General</button>
+        <button class="tab-button" id="display-button" onclick="openTab('display')">Display</button>
     </div>
 
-    <div class="general-content">
+    <div class="settings-tab">
+        <div class="tab-content" id="general-content">
+            <h3 class="tab-title">General</h3>
+            <p>Language</p>
+            <p>Theme</p>
+        </div>
 
-    </div>
-
-    <div class="display-content">
-        <h3>Display</h3>
-        <form method="POST" class="display-content-form">
-            {% for field in ['show_customer', 'show_items', 'show_payment_method', 'show_delivery_method', 'show_delivery_date', 'show_status', 'show_total'] %}
-                <div class="{{ field }}-setting">
-                    <label for="{{ field }}">{{ field.replace('_', ' ').title() }}</label>
-                    <input type="checkbox" name="{{ field }}" {% if getattr(settings, field) %}checked{% endif %}>
-                </div>
-            {% endfor %}
-            <button type="submit">Save</button>
-        </form>
+        <div class="tab-content" id="display-content">
+            <h3 class="tab-title">Display</h3>
+            <form method="POST" class="tab-form" id="display-form">
+                {% for field in ['show_customer', 'show_items', 'show_payment_method', 'show_delivery_method', 'show_delivery_date', 'show_status', 'show_total'] %}
+                    <div class="form-setting" id="{{ field }}-setting">
+                        <label for="{{ field }}">{{ field.replace('_', ' ').title() }} column</label>
+                        <input type="checkbox" name="{{ field }}" size="50" {% if getattr(settings, field) %}checked{% endif %}>
+                    </div>
+                {% endfor %}
+                <button type="submit" class="admin-button">Save</button>
+            </form>
+        </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script src=" {{ url_for('static', filename='js/settings.js') }} "></script>
 {% endblock %}
