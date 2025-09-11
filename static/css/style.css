@@ -5,6 +5,7 @@
 }
 
 body{
+    position: relative;
     font-family: 'Inter', 'Roboto', sans-serif;
     line-height: 1.5;
     color: #1f2937
@@ -98,20 +99,42 @@ nav.menu a.active p{
     cursor: pointer;
 }
 
-.user-profile{
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    gap: 5px;
-    margin-top: auto;
-}
-
 #logout-button{
     width: 90%;
     text-align: center;
-    margin: 0px auto 20px auto;
+    margin: auto auto 20px auto;
 
 }
+
+/* flash notifications */
+.flash-container{
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 999;
+}
+
+.flash-message{
+    opacity: 1;
+    color: white;
+    border-radius: 8px;
+    margin-top: 10px;
+    padding: 20px;
+    transition: opacity 0.5s ease;
+}
+
+.flash-message.success{
+    background-color: #28a745;
+}
+
+.flash-message.error{
+    background-color: #dc3545;
+}
+
+.flash-message.fade-out{
+    opacity: 0;
+}
+
 
 /* header */
 .header{
@@ -396,6 +419,10 @@ nav.menu a.active p{
     border-bottom: none;
 }
 
+.orders .order-items{
+    text-align: start;
+}
+
 .order-item-details{
     font-size: 14px;
     color: grey;
@@ -527,11 +554,70 @@ nav.menu a.active p{
 }
 
 .form-setting{
+    position: relative;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    padding: 15px 0px;
+    border-bottom: 1px solid #e4e4e4
+}
+
+.form-setting:last-of-type{
+    border-bottom: 0px;
     margin-bottom: 10px;
 }
 
+/* custom checkbox */
+
+.form-setting input[type="checkbox"]{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    z-index: 9;
+    cursor: pointer;
+}
+
+.form-setting .checkmark{
+    position: relative;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+    border: 2px solid #ddd;
+}
+
+.form-setting input[type="checkbox"]:checked + .checkmark{
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.form-setting input[type="checkbox"] + .checkmark::after{
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.form-setting input[type="checkbox"]:checked + .checkmark::after{
+    display: block;
+    left: 6px;
+    top: 2px;
+    width: 6px;
+    height: 12px;
+    border: solid #fff;
+    border-width: 0px 2px 2px 0px;
+    transform: rotate(45deg);
+}
+/* - */
+
 .tab-form button{
     align-self: flex-end;
+}
+
+.user-profile{
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 5px;
 }

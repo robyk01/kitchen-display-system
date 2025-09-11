@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, url_for
+from flask import Flask, render_template, request, session, redirect, url_for, flash
 from extensions import db, login_required, role_required
 from flask_migrate import Migrate
 from models import User, Settings
@@ -49,11 +49,15 @@ def login():
             session['user_id'] = user.id
             session['role'] = user.role
 
+            flash("Welcome!", "success")
+
             if session['role'] == 'admin':
                 return redirect(url_for('.home'))
             else:
                 return redirect(url_for('orders.show_orders'))
         
+        flash("Incorrect username or password.", "error")
+
     return render_template("login.html")
 
 @app.route('/logout')
@@ -86,7 +90,7 @@ def home():
     
     users = User.query.limit(10).all()
     
-    return render_template('home.html', page=f"Hello, {current_user.username}", current_user=current_user, order_count=order_count, live_orders_count=live_orders_count, orders=orders, users=users, user_count=len(users))
+    return render_template('home.html', page=f"Hello, {current_user.username}!", current_user=current_user, order_count=order_count, live_orders_count=live_orders_count, orders=orders, users=users, user_count=len(users))
 
 
 @app.route("/settings", methods=["GET", "POST"])

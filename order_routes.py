@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, Blueprint, session
+from flask import render_template, request, redirect, url_for, Blueprint, session, flash
 from extensions import db
 from models import Order, User
 from woo import wcapi
@@ -8,47 +8,51 @@ from datetime import datetime, date, timedelta
 orders_bp = Blueprint('orders', __name__)
 
 def sync_orders_from_woo(woo_orders):
-    for w in woo_orders:
-        delivery_type = get_order_meta(w, "_delivery_type")
-        delivery_date = get_order_meta(w, "_delivery_date_slot")
-        delivery_time_slot = get_order_meta(w, "_delivery_time_slot_id")
+    if woo_orders:
+        for w in woo_orders:
+            delivery_type = get_order_meta(w, "_delivery_type")
+            delivery_date = get_order_meta(w, "_delivery_date_slot")
+            delivery_time_slot = get_order_meta(w, "_delivery_time_slot_id")
 
-        time_slot_start_time = get_order_meta(w, "_delivery_time_start")
-        time_slot_end_time = get_order_meta(w, "_delivery_time_end")
-        time_slot_fee = get_order_meta(w, "_delivery_time_fee")
+            time_slot_start_time = get_order_meta(w, "_delivery_time_start")
+            time_slot_end_time = get_order_meta(w, "_delivery_time_end")
+            time_slot_fee = get_order_meta(w, "_delivery_time_fee")
 
-        existing = Order.query.filter_by(woo_order_id=w["id"]).first()
-        if not existing:
-            new_order = Order(
-                woo_order_id=w["id"],
-                customer_name=f"{w['billing']['first_name']} {w['billing']['last_name']}",
-                payment_method=w["payment_method"],
+            existing = Order.query.filter_by(woo_order_id=w["id"]).first()
+            if not existing:
+                new_order = Order(
+                    woo_order_id=w["id"],
+                    customer_name=f"{w['billing']['first_name']} {w['billing']['last_name']}",
+                    payment_method=w["payment_method"],
 
-                delivery_method=delivery_type,
-                delivery_date=delivery_date,
-                delivery_time_slot=delivery_time_slot,
+                    delivery_method=delivery_type,
+                    delivery_date=delivery_date,
+                    delivery_time_slot=delivery_time_slot,
 
-                time_slot_start_time=time_slot_start_time,
-                time_slot_end_time=time_slot_end_time,
-                time_slot_fee=time_slot_fee,
+                    time_slot_start_time=time_slot_start_time,
+                    time_slot_end_time=time_slot_end_time,
+                    time_slot_fee=time_slot_fee,
 
 
-                total=w["total"],
-                line_items=w["line_items"])
-            db.session.add(new_order)
-        else:
-            existing.payment_method=w["payment_method"]
+                    total=w["total"],
+                    line_items=w["line_items"])
+                db.session.add(new_order)
+            else:
+                existing.payment_method=w["payment_method"]
 
-            existing.delivery_method=delivery_type
-            existing.delivery_date=delivery_date
-            existing.delivery_time_slot=delivery_time_slot
-            
-            existing.time_slot_start_time=time_slot_start_time
-            existing.time_slot_end_time=time_slot_end_time
-            existing.time_slot_fee=time_slot_fee
+                existing.delivery_method=delivery_type
+                existing.delivery_date=delivery_date
+                existing.delivery_time_slot=delivery_time_slot
+                
+                existing.time_slot_start_time=time_slot_start_time
+                existing.time_slot_end_time=time_slot_end_time
+                existing.time_slot_fee=time_slot_fee
 
-            existing.total=w["total"]
-            existing.line_items=w["line_items"]
+                existing.total=w["total"]
+                existing.line_items=w["line_items"]
+        flash('Orders fetched succesfully!', 'success')
+    else:
+        flash('Cannot fetch orders', 'error')
     db.session.commit()
 
 def get_order_meta(order, key):
@@ -109,6 +113,7 @@ def update_status(id):
         data = {"status": "completed"}
         wcapi.put(f"orders/{order.woo_order_id}", data).json()
 
+    flash("Order status updated succesfully!", "success")
     db.session.commit()
     return redirect(url_for('orders.show_orders'))
 
@@ -116,10 +121,16 @@ def update_status(id):
 @login_required
 def edit_order(id):
     order = Order.query.filter_by(id=id).first()
+
+    if not order:
+        flash("Error viewing the order", "error")
+        return redirect(url_for('orders.show_orders'))
+
     if request.method == 'POST':
         order.status = request.form.get('status')
-        db.session.commit()
 
+        flash("Order edited succesfully!", "success")
+        db.session.commit()
         return redirect(url_for('.show_orders'))
     return render_template('edit_order.html', order=order)
 

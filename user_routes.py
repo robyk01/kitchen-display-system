@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, Blueprint, session
+from flask import render_template, request, redirect, url_for, Blueprint, session, flash
 from extensions import db
 from models import User
 
@@ -33,6 +33,8 @@ def edit_user(user_id):
     if request.method == 'POST':
         user.username = request.form.get('username')
         db.session.commit()
+
+        flash("User edited succesfully!", "success")
         return redirect(url_for('.show_users'))
     return render_template("edit_user.html", user=user)
 
@@ -44,4 +46,5 @@ def delete_user(user_id):
     db.session.delete(user)
     db.session.commit()
 
+    flash("User deleted succesfully!", "success")
     return redirect(url_for('.db_users'))

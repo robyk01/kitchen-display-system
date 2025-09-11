@@ -43,7 +43,7 @@
                 {% endif %}
 
                 {% if settings.show_delivery_method %}
-                    <td><p class="order-delivery-method">{{ order.delivery_method }}</p></td>
+                    <td><p class="order-delivery-method">{% if order.delivery_method %}{{ order.delivery_method.title() }}{% else %}None{% endif %}</p></td>
                 {% endif %}
 
                 {% if settings.show_delivery_date %}
@@ -54,7 +54,9 @@
                 {% endif %}
 
                 {% if settings.show_status %}
-                    <td>{{ order.status }}</td>
+                    <td>
+                        {{ order.status.replace('_', ' ').title() }}
+                    </td>
                 {% endif %}
                 
                 {% if settings.show_total %}
@@ -109,7 +111,7 @@
                 {% endif %}
 
                 {% if settings.show_delivery_method %}
-                    <td><p class="order-delivery-method">{{ order.delivery_method }}</p></td>
+                    <td><p class="order-delivery-method">{% if order.delivery_method %}{{ order.delivery_method.title() }}{% else %}None{% endif %}</p></td>
                 {% endif %}
 
                 {% if settings.show_delivery_date %}
@@ -120,7 +122,9 @@
                 {% endif %}
 
                 {% if settings.show_status %}
-                    <td>{{ order.status }}</td>
+                    <td>
+                        {{ order.status.replace('_', ' ').title() }}
+                    </td>
                 {% endif %}
                 
                 {% if settings.show_total %}

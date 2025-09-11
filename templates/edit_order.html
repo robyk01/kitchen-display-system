@@ -14,9 +14,9 @@
             <div class="status">
                 <label for="status">Status</label>
                 <select name="status" id="status">
-                    {% set options = ["In kitchen", "Ready", "Delivered"] %}
+                    {% set options = ["in_kitchen", "ready", "delivered"] %}
                     {% for option in options %}
-                        <option value="{{ option }}">{{ option }}</option>
+                        <option value="{{ option }}">{{ option.title() }}</option>
                     {% endfor %}
                 </select>
                 <p>Current status: {{ order.status }}</p>
