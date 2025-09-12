@@ -44,10 +44,11 @@ def sync_orders_from_woo(woo_orders):
                 db.session.add(Order(woo_order_id=w["id"], **data))
             else:
                 for key, value in data.items():
-                    if key == 'status' and existing.status == 'ready':
-                        continue
-                    else:
-                        setattr(existing, key, value)
+                    if key == 'status':
+                        if existing.status == 'ready' and value not in ['delivered', 'cancelled', 'completed']:
+                            continue
+                    
+                    setattr(existing, key, value)
 
         orders = Order.query.all()
 
