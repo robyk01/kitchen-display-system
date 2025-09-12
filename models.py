@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
+    __tablename__ = 'users'
+
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     password_hash = db.Column(db.String(120), nullable=False)
@@ -16,8 +18,10 @@ class User(db.Model):
         return check_password_hash(self.password_hash, password)
 
 class Settings(db.Model):
+    __tablename__ = 'settings'
+
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     user = relationship("User", back_populates="settings")
 
     show_customer = db.Column(db.Boolean, default=True)
@@ -32,11 +36,13 @@ class Settings(db.Model):
 
 
 class Order(db.Model):
+    __tablename__ = 'orders'
+
     id = db.Column(db.Integer, primary_key=True)
     woo_order_id = db.Column(db.Integer, unique=True, index=True, nullable=False)
 
     status = db.Column(
-        db.Enum("in_kitchen", "ready", "delivered", name="kds_status_enum"),
+        db.Enum("in_kitchen", "ready", "delivered", "cancelled", "deleted", name="kds_status_enum"),
         nullable=False,
         default="in_kitchen",
         server_default="in_kitchen"

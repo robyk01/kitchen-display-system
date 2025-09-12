@@ -8,51 +8,55 @@ from datetime import datetime, date, timedelta
 orders_bp = Blueprint('orders', __name__)
 
 def sync_orders_from_woo(woo_orders):
-    if woo_orders:
-        for w in woo_orders:
-            delivery_type = get_order_meta(w, "_delivery_type")
-            delivery_date = get_order_meta(w, "_delivery_date_slot")
-            delivery_time_slot = get_order_meta(w, "_delivery_time_slot_id")
-
-            time_slot_start_time = get_order_meta(w, "_delivery_time_start")
-            time_slot_end_time = get_order_meta(w, "_delivery_time_end")
-            time_slot_fee = get_order_meta(w, "_delivery_time_fee")
-
-            existing = Order.query.filter_by(woo_order_id=w["id"]).first()
-            if not existing:
-                new_order = Order(
-                    woo_order_id=w["id"],
-                    customer_name=f"{w['billing']['first_name']} {w['billing']['last_name']}",
-                    payment_method=w["payment_method"],
-
-                    delivery_method=delivery_type,
-                    delivery_date=delivery_date,
-                    delivery_time_slot=delivery_time_slot,
-
-                    time_slot_start_time=time_slot_start_time,
-                    time_slot_end_time=time_slot_end_time,
-                    time_slot_fee=time_slot_fee,
-
-
-                    total=w["total"],
-                    line_items=w["line_items"])
-                db.session.add(new_order)
-            else:
-                existing.payment_method=w["payment_method"]
-
-                existing.delivery_method=delivery_type
-                existing.delivery_date=delivery_date
-                existing.delivery_time_slot=delivery_time_slot
-                
-                existing.time_slot_start_time=time_slot_start_time
-                existing.time_slot_end_time=time_slot_end_time
-                existing.time_slot_fee=time_slot_fee
-
-                existing.total=w["total"]
-                existing.line_items=w["line_items"]
-        flash('Orders fetched succesfully!', 'success')
-    else:
+    if  not woo_orders:
         flash('Cannot fetch orders', 'error')
+    else:
+        woo_ids = [w["id"] for w in woo_orders]
+        existing_orders = {o.woo_order_id: o for o in Order.query.filter(Order.woo_order_id.in_(woo_ids)).all()}
+
+        woo_to_kds = {
+            "pending": "in_kitchen",
+            "on-hold": "in_kitchen",
+            "processing": "in_kitchen",
+            "completed": "delivered",
+            "cancelled": "cancelled"
+        }
+
+        for w in woo_orders:
+            existing = existing_orders.get(w["id"])
+            status = woo_to_kds.get(w["status"], "in_kitchen")
+
+            data = {
+                "customer_name": f"{w['billing']['first_name']} {w['billing']['last_name']}",
+                "payment_method": w["payment_method"],
+                "delivery_method": get_order_meta(w, "_delivery_type"),
+                "delivery_date": get_order_meta(w, "_delivery_date_slot"),
+                "delivery_time_slot": get_order_meta(w, "_delivery_time_slot_id"),
+                "time_slot_start_time": get_order_meta(w, "_delivery_time_start"),
+                "time_slot_end_time": get_order_meta(w, "_delivery_time_end"),
+                "time_slot_fee": get_order_meta(w, "_delivery_time_fee"),
+                "total": w["total"],
+                "line_items": w["line_items"],
+                "status": status
+            }
+
+            if not existing:
+                db.session.add(Order(woo_order_id=w["id"], **data))
+            else:
+                for key, value in data.items():
+                    if key == 'status' and existing.status == 'ready':
+                        continue
+                    else:
+                        setattr(existing, key, value)
+
+        orders = Order.query.all()
+
+        for o in orders:
+            if o.woo_order_id not in woo_ids:
+                o.status = 'deleted'
+
+        flash('Orders fetched succesfully!', 'success')
+        
     db.session.commit()
 
 def get_order_meta(order, key):
@@ -68,7 +72,7 @@ def show_orders():
     user = User.query.get(session.get('user_id'))
     settings = user.settings
 
-    response = wcapi.get("orders", params={"orderby": "date", "order": "desc"})
+    response = wcapi.get("orders", params={"orderby": "date", "order": "desc", "status": "pending, on-hold, processing, cancelled, completed"})
     
     if response.status_code == 200:
         woo_orders = response.json()
@@ -134,6 +138,30 @@ def edit_order(id):
         return redirect(url_for('.show_orders'))
     return render_template('edit_order.html', order=order)
 
+@orders_bp.route('/delete_order/<int:id>', methods=["POST"])
+@login_required
+def delete_order(id):
+    order = Order.query.get_or_404(id)
+
+    try:
+        data = {"status": "cancelled"}
+        wcapi.put(f"orders/{order.woo_order_id}", data).json()
+    except Exception as e:
+        flash("woo api failed", "error")
+        return redirect(url_for(".show_oders"))
+    
+    try:
+        db.session.delete(order)
+        db.session.commit()
+    except Exception as e:
+        flash("db failed", "error")
+        return redirect(url_for(".show_oders"))
+
+    flash("Order deleted succesfully!", "success")
+    return redirect(url_for('.show_orders'))
+
+
+
 # @orders_bp.route("/add_order", methods=["GET", "POST"])
 # def add_order():
 #     if request.method == "POST":
@@ -148,13 +176,3 @@ def edit_order(id):
 #         return redirect(url_for('.orders'))
 
 #     return render_template("add_order.html")
-
-
-# @orders_bp.route('/delete_order/<int:id>', methods=["POST"])
-# def delete_order(id):
-#     order = Order.query.get_or_404(id)
-
-#     db.session.delete(order)
-#     db.session.commit()
-
-#     return redirect(url_for('.orders'))
