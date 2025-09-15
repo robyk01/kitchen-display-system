@@ -1,177 +1,81 @@
 {% extends "base.html" %}
 
+{% from "macros.html" import order_row %}
 {% block content %}
 <div class="orders-content">
     {% include "header.html" %}
-    <h2>Live orders</h2>
-    <table class="orders" id="live-orders">
-        <tr>
-            <th>#</th>
-            {% if settings.show_customer %}<th>Customer</th>{% endif %}
-            {% if settings.show_items %}<th>Items</th>{% endif %}
-            {% if settings.show_payment_method %}<th>Payment Method</th>{% endif %}
-            {% if settings.show_delivery_method %}<th>Delivery Method</th>{% endif %}
-            {% if settings.show_delivery_date %}<th>Delivery Date</th>{% endif %}
-            {% if settings.show_status %}<th>Status</th>{% endif %}
-            {% if settings.show_total %}<th>Total</th>{% endif %}
-            <th>Actions</th>
-        </tr>
-            {% for order in in_kitchen %}
-            <tr>
-                <td>{{ order.id }}</td>
-
-                {% if settings.show_customer %}
-                    <td>{{ order.customer_name }}</td>
-                {% endif %}
-
-                {% if settings.show_items %}
-                    <td class="order-items">
+    {% if error %}
+    <p class="order-error">{{ error }}</p>
+    {% else %}
+        <h2>Live orders</h2>
+        {% if settings.display_type == 'list' %}
+            <table class="orders" id="live-orders">
+                <tr>
+                    <th>#</th>
+                    {% if settings.show_customer %}<th>Customer</th>{% endif %}
+                    {% if settings.show_items %}<th>Items</th>{% endif %}
+                    {% if settings.show_payment_method %}<th>Payment Method</th>{% endif %}
+                    {% if settings.show_delivery_method %}<th>Delivery Method</th>{% endif %}
+                    {% if settings.show_delivery_date %}<th>Delivery Date</th>{% endif %}
+                    {% if settings.show_status %}<th>Status</th>{% endif %}
+                    {% if settings.show_total %}<th>Total</th>{% endif %}
+                    <th>Actions</th>
+                </tr>
+                    {% for order in in_kitchen %}
+                        <tr>
+                            {{ order_row(order, settings) }}
+                        </tr>
+                    {% endfor %}
+            </table>
+        {% elif settings.display_type == 'grid' %}
+            <div class="order-grid">
+                {% for order in in_kitchen %}
+                    <div class="order-card">
+                        <p>{{ order.id }}</p>
+                        <p>{{ order.customer_name }}</p>
                         {% for product in order.line_items %}
-                            <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
+                            <p>{{ product.quantity }} x {{ product.name }}</p>
                         {% endfor %}
-                    </td>
-                {% endif %}
-
-                {% if settings.show_payment_method %}
-                    <td>
-                        {% if order.payment_method == "cod" %}
-                            Cash on delivery
-                        {% elif order.payment_method == "bacs" %}
-                            Bank transfer
-                        {% endif %}
-                    </td>
-                {% endif %}
-
-                {% if settings.show_delivery_method %}
-                    <td><p class="order-delivery-method">{% if order.delivery_method %}{{ order.delivery_method.title() }}{% else %}None{% endif %}</p></td>
-                {% endif %}
-
-                {% if settings.show_delivery_date %}
-                    <td>
-                        <p class="order-delivery-date">{{ order.delivery_date }}</p>
-                        {{ order.time_slot_start_time }} - {{ order.time_slot_end_time }}
-                    </td>
-                {% endif %}
-
-                {% if settings.show_status %}
-                    <td>
-                        {{ order.status.replace('_', ' ').title() }}
-                    </td>
-                {% endif %}
-                
-                {% if settings.show_total %}
-                    <td>{{ order.total }} RON</td>
-                {% endif %}
-
-                <td class="order-buttons">
-                    <div class="order-dropdown-wrapper">
-                        <button class="order-actions-button">...</button>
-                        <div class="order-actions-dropdown">
-                            <a href=" {{ url_for('orders.update_status', id=order.id) }} " class="admin-button">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" /></svg>
-                                Update status
-                            </a>
-                            <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
-                                Edit order
-                            </a>
-                            <form action=" {{ url_for('orders.delete_order', id=order.id) }}" method="POST">
-                                <button type="submit" onclick="return confirm('Are you sure?')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
-                                    Cancel order
-                                </button>
-                            </form>
-                        </div>
+                        <p>{{ order.status }}</p>
                     </div>
-                </td>
-            </tr>
-            {% endfor %}
-    </table>
-
-    <h2>Completed orders</h2>
-    <table class="orders" id="completed-orders">
-        <tr>
-            <th>#</th>
-            {% if settings.show_customer %}<th>Customer</th>{% endif %}
-            {% if settings.show_items %}<th>Items</th>{% endif %}
-            {% if settings.show_payment_method %}<th>Payment Method</th>{% endif %}
-            {% if settings.show_delivery_method %}<th>Delivery Method</th>{% endif %}
-            {% if settings.show_delivery_date %}<th>Delivery Date</th>{% endif %}
-            {% if settings.show_status %}<th>Status</th>{% endif %}
-            {% if settings.show_total %}<th>Total</th>{% endif %}
-            <th>Actions</th>
-        </tr>
-            {% for order in ready %}
-            <tr class=" {% if order in soon_orders %}soon-order{% elif order in late_orders %}late-order{% endif %}">
-                <td>{{ order.id }}</td>
-
-                {% if settings.show_customer %}
-                    <td>{{ order.customer_name }}</td>
-                {% endif %}
-
-                {% if settings.show_items %}
-                    <td class="order-items">
+                {% endfor %}
+            </div>
+        {% endif %}
+        <h2>Completed orders</h2>
+        {% if settings.display_type == 'list' %}
+            <table class="orders" id="completed-orders">
+                <tr>
+                    <th>#</th>
+                    {% if settings.show_customer %}<th>Customer</th>{% endif %}
+                    {% if settings.show_items %}<th>Items</th>{% endif %}
+                    {% if settings.show_payment_method %}<th>Payment Method</th>{% endif %}
+                    {% if settings.show_delivery_method %}<th>Delivery Method</th>{% endif %}
+                    {% if settings.show_delivery_date %}<th>Delivery Date</th>{% endif %}
+                    {% if settings.show_status %}<th>Status</th>{% endif %}
+                    {% if settings.show_total %}<th>Total</th>{% endif %}
+                    <th>Actions</th>
+                </tr>
+                    {% for order in ready %}
+                    <tr class=" {% if order in soon_orders %}soon-order{% elif order in late_orders %}late-order{% endif %}">
+                        {{ order_row(order, settings) }}
+                    </tr>
+                    {% endfor %}
+            </table>
+        {% elif settings.display_type == 'grid' %}
+            <div class="order-grid">
+                {% for order in ready %}
+                    <div class="order-card">
+                        {{ order.id }}
+                        {{ order.customer_name }}
                         {% for product in order.line_items %}
-                            <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
+                            {{ product.quantity }} x {{ product.name }}
                         {% endfor %}
-                    </td>
-                {% endif %}
-
-                {% if settings.show_payment_method %}
-                    <td>
-                        {% if order.payment_method == "cod" %}
-                            Cash on delivery
-                        {% elif order.payment_method == "bacs" %}
-                            Bank transfer
-                        {% endif %}
-                    </td>
-                {% endif %}
-
-                {% if settings.show_delivery_method %}
-                    <td><p class="order-delivery-method">{% if order.delivery_method %}{{ order.delivery_method.title() }}{% else %}None{% endif %}</p></td>
-                {% endif %}
-
-                {% if settings.show_delivery_date %}
-                    <td>
-                        <p class="order-delivery-date">{{ order.delivery_date }}</p>
-                        {{ order.time_slot_start_time }} - {{ order.time_slot_end_time }}
-                    </td>
-                {% endif %}
-
-                {% if settings.show_status %}
-                    <td>
-                        {{ order.status.replace('_', ' ').title() }}
-                    </td>
-                {% endif %}
-                
-                {% if settings.show_total %}
-                    <td>{{ order.total }} RON</td>
-                {% endif %}
-
-                 <td class="order-buttons">
-                    <div class="order-dropdown-wrapper">
-                        <button class="order-actions-button">...</button>
-                        <div class="order-actions-dropdown">
-                            <a href=" {{ url_for('orders.update_status', id=order.id) }} " class="admin-button">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" /></svg>
-                                Update status
-                            </a>
-                            <a href=" {{ url_for('orders.edit_order', id=order.id) }} " class="admin-button">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
-                                Edit order
-                            </a>
-                            <form action=" {{ url_for('orders.delete_order', id=order.id) }}" method="POST">
-                                <button type="submit" onclick="return confirm('Are you sure?')">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
-                                    Cancel order
-                                </button>
-                            </form>
-                        </div>
                     </div>
-                </td>
-            </tr>
-            {% endfor %}
-    </table>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    {% endif %}
 </div>
 {% endblock %}
 

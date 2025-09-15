@@ -1,12 +1,76 @@
 from flask import render_template, request, redirect, url_for, Blueprint, session, flash
 from extensions import db
 from models import Order, User
-from woo import wcapi
+from woocommerce import API
 from extensions import login_required
 from datetime import datetime, date, timedelta
+import requests
 
 orders_bp = Blueprint('orders', __name__)
 
+@orders_bp.route("/orders")
+@login_required
+def show_orders():
+    user = User.query.get(session.get('user_id'))
+    settings = user.settings
+
+    woo_orders, error = fetch_woo_orders(user)
+
+    if error:
+        flash(error, "error")
+        orders = []
+    else:
+        sync_orders_from_woo(woo_orders)
+        orders = Order.query.all()
+    
+    in_kitchen = [o for o in orders if o.status == "in_kitchen"]
+    ready = [o for o in orders if o.status == "ready"]
+
+    soon_orders = []
+    late_orders = []
+    now = datetime.now()
+    today = date.today().isoformat()
+
+    for order in ready:
+        start_time_str = order.time_slot_start_time or "23:59"  
+        end_time_str = order.time_slot_end_time or "00:00"      
+
+        start_time = datetime.strptime(start_time_str, "%H:%M").time()
+        end_time = datetime.strptime(end_time_str, "%H:%M").time()
+
+        start_dt = datetime.combine(datetime.today(), start_time)
+        end_dt = datetime.combine(datetime.today(), end_time)
+
+        if order.delivery_date == today and start_dt - timedelta(minutes=10) <= now < end_dt:
+            soon_orders.append(order) # yellow alert
+        elif order.delivery_date == today and now >= end_dt:
+            late_orders.append(order) # red alert
+
+    return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, soon_orders=soon_orders, late_orders=late_orders, settings=settings, error=error)
+
+# Set Woocommerce API
+def get_wcapi(user):
+    if not user.api_key or not user.api_secret or not user.store_url:
+        return None
+    
+    return API(url=user.store_url, consumer_key=user.api_key, consumer_secret=user.api_secret, version="wc/v3", verify_ssl=False)
+
+
+# Check if user linked store API credentials with KDS
+def fetch_woo_orders(user):
+    if not user.api_key or not user.api_secret or not user.store_url:
+        return None, "Please connect your store API in settings"
+    
+    try:
+        wcapi = get_wcapi(user)
+        response = wcapi.get("orders", params={"orderby": "date", "order": "desc", "status": "pending, on-hold, processing, cancelled, completed"})
+        response.raise_for_status()
+        return response.json(), None
+    except requests.exceptions.RequestException as e:
+        return None, f"Cannot connect to store: {str(e)}"
+
+
+# Sync order from Woocommerce to database
 def sync_orders_from_woo(woo_orders):
     if  not woo_orders:
         flash('Cannot fetch orders', 'error')
@@ -60,6 +124,8 @@ def sync_orders_from_woo(woo_orders):
         
     db.session.commit()
 
+
+# Get metadata from Woocommerce order
 def get_order_meta(order, key):
     for meta in order.get("meta_data", []):
         if meta["key"] == key:
@@ -67,50 +133,14 @@ def get_order_meta(order, key):
     return None
 
 
-@orders_bp.route("/orders")
-@login_required
-def show_orders():
-    user = User.query.get(session.get('user_id'))
-    settings = user.settings
-
-    response = wcapi.get("orders", params={"orderby": "date", "order": "desc", "status": "pending, on-hold, processing, cancelled, completed"})
-    
-    if response.status_code == 200:
-        woo_orders = response.json()
-        sync_orders_from_woo(woo_orders)
-    else:
-        return f"Error: {response.status_code}"
-    
-    in_kitchen = Order.query.filter_by(status="in_kitchen").all()
-    ready = Order.query.filter_by(status="ready").all()
-
-    soon_orders = []
-    late_orders = []
-    now = datetime.now()
-    today = date.today().isoformat()
-    orders = Order.query.all()
-
-    for order in orders:
-        start_time_str = order.time_slot_start_time or "23:59"  
-        end_time_str = order.time_slot_end_time or "00:00"      
-
-        start_time = datetime.strptime(start_time_str, "%H:%M").time()
-        end_time = datetime.strptime(end_time_str, "%H:%M").time()
-
-        start_dt = datetime.combine(datetime.today(), start_time)
-        end_dt = datetime.combine(datetime.today(), end_time)
-
-        if order.status == 'ready' and order.delivery_date == today and start_dt - timedelta(minutes=10) <= now < end_dt:
-            soon_orders.append(order) # yellow alert
-        elif order.status == 'ready' and order.delivery_date == today and now >= end_dt:
-            late_orders.append(order) # red alert
-
-    return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, soon_orders=soon_orders, late_orders=late_orders, settings=settings)
 
 @orders_bp.route('/update_status/<int:id>')
 @login_required
 def update_status(id):
     order = Order.query.get(id)
+    user = User.query.get(session.get('user_id'))
+    wcapi = get_wcapi(user)
+
     if order.status == 'in_kitchen':
         order.status = 'ready'
     elif order.status == 'ready':
@@ -143,20 +173,14 @@ def edit_order(id):
 @login_required
 def delete_order(id):
     order = Order.query.get_or_404(id)
+    user = User.query.get(session.get('user_id'))
+    wcapi = get_wcapi(user)
 
-    try:
-        data = {"status": "cancelled"}
-        wcapi.put(f"orders/{order.woo_order_id}", data).json()
-    except Exception as e:
-        flash("woo api failed", "error")
-        return redirect(url_for(".show_oders"))
+    data = {"status": "cancelled"}
+    wcapi.put(f"orders/{order.woo_order_id}", data).json()
     
-    try:
-        db.session.delete(order)
-        db.session.commit()
-    except Exception as e:
-        flash("db failed", "error")
-        return redirect(url_for(".show_oders"))
+    db.session.delete(order)
+    db.session.commit()
 
     flash("Order deleted succesfully!", "success")
     return redirect(url_for('.show_orders'))

@@ -6,28 +6,6 @@
 <div class="home-content">
     {% include "header.html" %}
     <div class="cards">
-        <div class="card" id="orders-card">
-            <h2>Orders</h2>
-            <ul class="order-list">
-                {% for order in orders %}
-                    <li>
-                        <p>{{ order.billing.first_name }}:</p>
-                        <div class="home-orders">
-                            {% for item in order.line_items %}
-                                <p>{{ item.name }}</p>
-                            {% endfor %}
-                        </div>
-                        <p>{{ order.total }}</p>
-                    </li>
-                {% endfor %}
-            </ul>
-            <div class="orders-card-bottom">
-                <p class="order-count">Order count: {{ order_count }}</p>
-                <p class="live-orders-count">Live orders: {{ live_orders_count }}</p>
-                <a href=" {{ url_for('orders.show_orders')}} " class="admin-button" id="see-all-orders">See all orders</a>
-            </div>
-        </div>
-
         <div class="card" id="users-card">
             <h2>Users</h2>
             <ul class="user-list">

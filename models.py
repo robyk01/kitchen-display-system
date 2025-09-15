@@ -11,6 +11,11 @@ class User(db.Model):
     role = db.Column(db.String(20), default="user")
     settings = relationship("Settings", uselist=False, back_populates="user")
 
+    api_key = db.Column(db.String(100))
+    api_secret = db.Column(db.String(100))
+    store_url = db.Column(db.String(255))
+
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password, method="pbkdf2:sha256")
 
@@ -32,6 +37,7 @@ class Settings(db.Model):
     show_status = db.Column(db.Boolean, default=True)
     show_total = db.Column(db.Boolean, default=True)
 
+    display_type = db.Column(db.String(20), default="grid")
 
 
 

@@ -5,7 +5,6 @@ from models import User, Settings
 #from user_routes import users_bp
 from order_routes import orders_bp
 from user_routes import users_bp
-from woo import wcapi
 from datetime import datetime
 
 
@@ -73,24 +72,24 @@ def logout():
 def home():
     current_user = User.query.get(session.get("user_id"))
 
-    response = wcapi.get('orders')
+    # response = wcapi.get('orders')
 
-    if response.status_code == 200:
-        orders = response.json()
-        order_count = response.headers.get('X-WP-Total', 0)
-    else:
-        return f"Error: {response.status_code}"
+    # if response.status_code == 200:
+    #     orders = response.json()
+    #     order_count = response.headers.get('X-WP-Total', 0)
+    # else:
+    #     return f"Error: {response.status_code}"
     
-    live = wcapi.get("orders", params={"status": "processing,on-hold"})
+    # live = wcapi.get("orders", params={"status": "processing,on-hold"})
 
-    if live.status_code == 200:
-        live_orders_count = live.headers.get("X-WP-Total", 0)
-    else:
-        return f"Error: {live.status_code}"
+    # if live.status_code == 200:
+    #     live_orders_count = live.headers.get("X-WP-Total", 0)
+    # else:
+    #     return f"Error: {live.status_code}"
     
     users = User.query.limit(10).all()
     
-    return render_template('home.html', page=f"Hello, {current_user.username}!", current_user=current_user, order_count=order_count, live_orders_count=live_orders_count, orders=orders, users=users, user_count=len(users))
+    return render_template('home.html', page=f"Hello, {current_user.username}!", current_user=current_user, users=users, user_count=len(users))
 
 
 @app.route("/settings", methods=["GET", "POST"])
@@ -103,14 +102,21 @@ def settings():
         db.session.commit()
 
     settings = user.settings
+    form_name = request.form.get('form_name')
 
     if request.method == 'POST':
-        for field in ['show_customer', 'show_items', 'show_payment_method', 'show_delivery_method', 'show_delivery_date', 'show_status', 'show_total']:
-            setattr(settings, field, bool(request.form.get(field)))
+        if form_name == 'general':
+            for field in ["api_key", "api_secret", "store_url"]:
+                setattr(user, field, request.form.get(field))
+
+        if form_name == 'display':
+            setattr(settings, 'display_type', request.form.get('display_type'))
+            for field in ['show_customer', 'show_items', 'show_payment_method', 'show_delivery_method', 'show_delivery_date', 'show_status', 'show_total']:
+                setattr(settings, field, bool(request.form.get(field)))
 
         db.session.commit()
 
-    return render_template("settings.html", page="Settings", settings=settings, getattr=getattr)
+    return render_template("settings.html", page="Settings", settings=settings, getattr=getattr, user=user)
 
 
 @app.route("/users/<string:username>")
