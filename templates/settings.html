@@ -18,17 +18,17 @@
             <form method="POST" class="tab-form" id="general-form">
                 <div class="form-setting">
                     <label for="api_key">API Key</label>
-                    <input type="text" name="api_key" value="{{ user.api_key }}">
+                    <input type="text" name="api_key" value="{{ store.api_key }}">
                 </div>
 
                 <div class="form-setting">
                     <label for="api_secret">API Secret</label>
-                    <input type="text" name="api_secret" value="{{ user.api_secret }}">
+                    <input type="text" name="api_secret" value="{{ store.api_secret }}">
                 </div>
 
                 <div class="form-setting">
                     <label for="store_url">Store URL</label>
-                    <input type="text" name="store_url" value="{{ user.store_url }}">
+                    <input type="text" name="store_url" value="{{ store.store_url }}">
                 </div>
 
                 <input type="hidden" name="form_name" value="general">

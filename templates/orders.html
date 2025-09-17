@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% from "macros.html" import order_row %}
+{% from "macros.html" import order_card %}
 {% block content %}
 <div class="orders-content">
     {% include "header.html" %}
@@ -30,14 +31,7 @@
         {% elif settings.display_type == 'grid' %}
             <div class="order-grid">
                 {% for order in in_kitchen %}
-                    <div class="order-card">
-                        <p>{{ order.id }}</p>
-                        <p>{{ order.customer_name }}</p>
-                        {% for product in order.line_items %}
-                            <p>{{ product.quantity }} x {{ product.name }}</p>
-                        {% endfor %}
-                        <p>{{ order.status }}</p>
-                    </div>
+                    {{ order_card(order, settings) }}
                 {% endfor %}
             </div>
         {% endif %}
@@ -64,13 +58,7 @@
         {% elif settings.display_type == 'grid' %}
             <div class="order-grid">
                 {% for order in ready %}
-                    <div class="order-card">
-                        {{ order.id }}
-                        {{ order.customer_name }}
-                        {% for product in order.line_items %}
-                            {{ product.quantity }} x {{ product.name }}
-                        {% endfor %}
-                    </div>
+                    {{ order_card(order, setings) }}
                 {% endfor %}
             </div>
         {% endif %}

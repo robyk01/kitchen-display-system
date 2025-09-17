@@ -1,6 +1,8 @@
 from flask import render_template, request, redirect, url_for, Blueprint, session, flash
 from extensions import db
-from models import User
+from models import User, Store
+from order_routes import get_wcapi
+import requests
 
 users_bp = Blueprint('users', __name__)
 
@@ -29,6 +31,9 @@ def show_users():
 @users_bp.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)
+    store = Store.query.filter_by(user_id=user_id).first()
+
+    error = check_store_connection(store)
 
     if request.method == 'POST':
         user.username = request.form.get('username')
@@ -36,7 +41,7 @@ def edit_user(user_id):
 
         flash("User edited succesfully!", "success")
         return redirect(url_for('.show_users'))
-    return render_template("edit_user.html", user=user)
+    return render_template("edit_user.html", user=user, page=f"Edit user: {user.username}", store=store, error=error)
 
 
 @users_bp.route('/delete_user/<int:user_id>', methods = ['POST'])
@@ -48,3 +53,22 @@ def delete_user(user_id):
 
     flash("User deleted succesfully!", "success")
     return redirect(url_for('.db_users'))
+
+def check_store_connection(store):
+    if not store.api_key or not store.api_secret or not store.store_url:
+        return "Store credentials missing."
+    
+    try:
+        wcapi = get_wcapi(store)
+        response = wcapi.get("orders")
+        response.raise_for_status()
+        return None
+    except requests.exceptions.HTTPError as e:
+        return f"Store returned an error: {response.status_code}"
+    except requests.exceptions.ConnectionError:
+        return "Could not connect to the store."
+    except requests.exceptions.Timeout:
+        return "Connection timed out."
+    except requests.exceptions.RequestException:
+        return "Unexpected error contacting store."
+

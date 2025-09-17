@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, Blueprint, session, flash
 from extensions import db
-from models import Order, User
+from models import Order, User, Store
 from woocommerce import API
 from extensions import login_required
 from datetime import datetime, date, timedelta
@@ -13,8 +13,9 @@ orders_bp = Blueprint('orders', __name__)
 def show_orders():
     user = User.query.get(session.get('user_id'))
     settings = user.settings
+    store = Store.query.filter_by(user_id=session.get('user_id')).first()
 
-    woo_orders, error = fetch_woo_orders(user)
+    woo_orders, error = fetch_woo_orders(store)
 
     if error:
         flash(error, "error")
@@ -49,25 +50,31 @@ def show_orders():
     return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, soon_orders=soon_orders, late_orders=late_orders, settings=settings, error=error)
 
 # Set Woocommerce API
-def get_wcapi(user):
-    if not user.api_key or not user.api_secret or not user.store_url:
+def get_wcapi(store):
+    if not store.api_key or not store.api_secret or not store.store_url:
         return None
     
-    return API(url=user.store_url, consumer_key=user.api_key, consumer_secret=user.api_secret, version="wc/v3", verify_ssl=False)
+    return API(url=store.store_url, consumer_key=store.api_key, consumer_secret=store.api_secret, version="wc/v3", verify_ssl=False)
 
 
 # Check if user linked store API credentials with KDS
-def fetch_woo_orders(user):
-    if not user.api_key or not user.api_secret or not user.store_url:
+def fetch_woo_orders(store):
+    if not store.api_key or not store.api_secret or not store.store_url:
         return None, "Please connect your store API in settings"
     
     try:
-        wcapi = get_wcapi(user)
+        wcapi = get_wcapi(store)
         response = wcapi.get("orders", params={"orderby": "date", "order": "desc", "status": "pending, on-hold, processing, cancelled, completed"})
         response.raise_for_status()
         return response.json(), None
+    except requests.exceptions.HTTPError as e:
+        return None, f"Store returned an error: {response.status_code}"
+    except requests.exceptions.ConnectionError as e:
+        return None, "Could not connect to the store. Please check your website."
+    except requests.exceptions.Timeout as e:
+        return None, "Connection timed out. Try again later."
     except requests.exceptions.RequestException as e:
-        return None, f"Cannot connect to store: {str(e)}"
+        return None, "An unexpected error occurred when contacting the store."
 
 
 # Sync order from Woocommerce to database
@@ -138,8 +145,8 @@ def get_order_meta(order, key):
 @login_required
 def update_status(id):
     order = Order.query.get(id)
-    user = User.query.get(session.get('user_id'))
-    wcapi = get_wcapi(user)
+    store = Store.query.filter_by(user_id=session.get('user_id')).first()
+    wcapi = get_wcapi(store)
 
     if order.status == 'in_kitchen':
         order.status = 'ready'
@@ -173,8 +180,8 @@ def edit_order(id):
 @login_required
 def delete_order(id):
     order = Order.query.get_or_404(id)
-    user = User.query.get(session.get('user_id'))
-    wcapi = get_wcapi(user)
+    store = Store.query.filter_by(user_id=session.get('user_id')).first()
+    wcapi = get_wcapi(store)
 
     data = {"status": "cancelled"}
     wcapi.put(f"orders/{order.woo_order_id}", data).json()

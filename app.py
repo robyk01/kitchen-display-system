@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, redirect, url_for, flash
 from extensions import db, login_required, role_required
 from flask_migrate import Migrate
-from models import User, Settings
+from models import User, Settings, Store
 #from user_routes import users_bp
 from order_routes import orders_bp
 from user_routes import users_bp
@@ -96,6 +96,7 @@ def home():
 @login_required
 def settings():
     user = User.query.get_or_404(session.get('user_id'))
+    store = Store.query.filter_by(user_id=session.get('user_id')).first()
 
     if not user.settings:
         user.settings = Settings()
@@ -116,7 +117,7 @@ def settings():
 
         db.session.commit()
 
-    return render_template("settings.html", page="Settings", settings=settings, getattr=getattr, user=user)
+    return render_template("settings.html", page="Settings", settings=settings, getattr=getattr, user=user, store=store)
 
 
 @app.route("/users/<string:username>")

@@ -2,11 +2,24 @@
 
 {% block content %}
 <div class="edit-user-content">
-    <h2>Edit user {{ user.username }}</h2>
-    <form class="edit-form" method="POST">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username"><p>Current name: {{ user.username }}</p>
-        <input class="admin-button" id="edit-user-button" type="submit">
+    {% include "header.html" %}
+    <div class="user-settings">
+        <div class="user-stores">
+            <h3>Stores:</h3>
+            <div class="user-store-card">
+                <div class="store-card-left">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
+                    <p>{{ store.name }}</p>
+                </div>
+                <div class="store-card-right {% if error %}offline{% else %}online{% endif %}"></div>
+        </div>
+    </div>
+    <form class="tab-form edit-form" method="POST">
+        <div class="form-setting">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" value="{{ user.username }}">
+            </div>
+        <button type="submit" class="admin-button" id="edit-user-button">Save</button>
     </form>
 </div>
 {% endblock %}

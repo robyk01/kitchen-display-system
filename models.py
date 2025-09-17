@@ -2,6 +2,7 @@ from extensions import db
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -10,10 +11,6 @@ class User(db.Model):
     password_hash = db.Column(db.String(120), nullable=False)
     role = db.Column(db.String(20), default="user")
     settings = relationship("Settings", uselist=False, back_populates="user")
-
-    api_key = db.Column(db.String(100))
-    api_secret = db.Column(db.String(100))
-    store_url = db.Column(db.String(255))
 
 
     def set_password(self, password):
@@ -26,7 +23,7 @@ class Settings(db.Model):
     __tablename__ = 'settings'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), name='fk_settings_user_id')
     user = relationship("User", back_populates="settings")
 
     show_customer = db.Column(db.Boolean, default=True)
@@ -40,15 +37,28 @@ class Settings(db.Model):
     display_type = db.Column(db.String(20), default="grid")
 
 
+class Store(db.Model):
+    __tablename__ = 'stores'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100))
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), name='fk_store_user_id')
+
+    api_key = db.Column(db.String(100))
+    api_secret = db.Column(db.String(100))
+    store_url = db.Column(db.String(255))
+
+    orders = db.relationship("Order", backref="store", lazy=True)
 
 class Order(db.Model):
     __tablename__ = 'orders'
 
     id = db.Column(db.Integer, primary_key=True)
     woo_order_id = db.Column(db.Integer, unique=True, index=True, nullable=False)
+    store_id = db.Column(db.Integer, db.ForeignKey("stores.id"), name='fk_order_store_id')
 
     status = db.Column(
-        db.Enum("in_kitchen", "ready", "delivered", "cancelled", "deleted", name="kds_status_enum"),
+        db.String(20),
         nullable=False,
         default="in_kitchen",
         server_default="in_kitchen"
@@ -67,3 +77,4 @@ class Order(db.Model):
 
     total = db.Column(db.Numeric(10, 2))
     line_items = db.Column(db.JSON)
+
