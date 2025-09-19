@@ -39,6 +39,8 @@ body{
 .logo{
     padding: 15px 0px 0px 15px;
     margin-bottom: 15px;
+    text-decoration: none;
+    color: black;
     font-size: 32px;
     font-weight: 700;
 }
@@ -351,7 +353,7 @@ nav.menu a.active p{
     height: 30px;
 }
 
-/* edit user */
+/* user edit */
 
 .edit-user-content{
     margin: 30px;
@@ -377,15 +379,32 @@ nav.menu a.active p{
     display: flex;
     justify-content: space-between;
     align-items: center;
+    text-decoration: none;
     padding: 15px;
     width: 30%;
     border: 1px solid #ddd;
     border-radius: 8px;
+    cursor: pointer;
+    transition: box-shadow 0.3s ease;
+}
+
+.user-store-card:hover{
+    box-shadow: 0px 4px 40px -20px rgba(0,0,0,0.2);
 }
 
 .store-card-left{
     display: flex;
+    align-items: center;
     gap: 10px;
+}
+
+.store-card-left p, .store-card-left svg{
+    color: black;
+}
+
+.store-card-title .store-card-status{
+    font-size: 12px;
+    color: #666666;
 }
 
 .store-card-right{
@@ -402,6 +421,13 @@ nav.menu a.active p{
 
 .store-card-right.offline{
     background-color: red;
+}
+
+
+/* store edit */
+
+.edit-store-content{
+    margin: 30px;
 }
 
 

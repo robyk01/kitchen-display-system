@@ -23,7 +23,7 @@
     <div class="container" id="{% if role == 'admin' %}admin{% elif role == 'user' %}user{% endif %}">
         {% if role == 'admin' %}
         <div class="sidebar">
-            <div class="logo">KDS</div>
+            <a href=" {{ url_for('home') }}" class="logo">KDS</a>
             <nav class="menu">
 
                 <a href="{{ url_for('home') }}" class="{% if request.path == url_for('home') %}active{% endif %}">

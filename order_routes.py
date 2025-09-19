@@ -4,6 +4,7 @@ from models import Order, User, Store
 from woocommerce import API
 from extensions import login_required
 from datetime import datetime, date, timedelta
+from addons import ADDON_HANDLERS
 import requests
 
 orders_bp = Blueprint('orders', __name__)
@@ -21,8 +22,8 @@ def show_orders():
         flash(error, "error")
         orders = []
     else:
-        sync_orders_from_woo(woo_orders)
-        orders = Order.query.all()
+        sync_orders_from_woo(woo_orders, store)
+        orders = store.orders
     
     in_kitchen = [o for o in orders if o.status == "in_kitchen"]
     ready = [o for o in orders if o.status == "ready"]
@@ -78,12 +79,17 @@ def fetch_woo_orders(store):
 
 
 # Sync order from Woocommerce to database
-def sync_orders_from_woo(woo_orders):
-    if  not woo_orders:
+def sync_orders_from_woo(woo_orders, store):
+    if not woo_orders:
         flash('Cannot fetch orders', 'error')
     else:
         woo_ids = [w["id"] for w in woo_orders]
-        existing_orders = {o.woo_order_id: o for o in Order.query.filter(Order.woo_order_id.in_(woo_ids)).all()}
+        existing_orders = {
+            o.woo_order_id: o 
+            for o in Order.query.filter(
+                Order.woo_order_id.in_(woo_ids),
+                Order.store_id == store.id
+                ).all()}
 
         woo_to_kds = {
             "pending": "in_kitchen",
@@ -93,22 +99,25 @@ def sync_orders_from_woo(woo_orders):
             "cancelled": "cancelled"
         }
 
+
         for w in woo_orders:
             existing = existing_orders.get(w["id"])
             status = woo_to_kds.get(w["status"], "in_kitchen")
 
+            addon_data = {}
+            for addon in store.addons:
+                handler = ADDON_HANDLERS.get(addon)
+                if handler:
+                    addon_data[addon] = handler(w)
+
             data = {
+                "store_id": store.id,
                 "customer_name": f"{w['billing']['first_name']} {w['billing']['last_name']}",
                 "payment_method": w["payment_method"],
-                "delivery_method": get_order_meta(w, "_delivery_type"),
-                "delivery_date": get_order_meta(w, "_delivery_date_slot"),
-                "delivery_time_slot": get_order_meta(w, "_delivery_time_slot_id"),
-                "time_slot_start_time": get_order_meta(w, "_delivery_time_start"),
-                "time_slot_end_time": get_order_meta(w, "_delivery_time_end"),
-                "time_slot_fee": get_order_meta(w, "_delivery_time_fee"),
                 "total": w["total"],
                 "line_items": w["line_items"],
-                "status": status
+                "status": status,
+                "addons": addon_data
             }
 
             if not existing:
@@ -121,7 +130,7 @@ def sync_orders_from_woo(woo_orders):
                     
                     setattr(existing, key, value)
 
-        orders = Order.query.all()
+        orders = store.orders
 
         for o in orders:
             if o.woo_order_id not in woo_ids:
@@ -132,16 +141,8 @@ def sync_orders_from_woo(woo_orders):
     db.session.commit()
 
 
-# Get metadata from Woocommerce order
-def get_order_meta(order, key):
-    for meta in order.get("meta_data", []):
-        if meta["key"] == key:
-            return meta["value"]
-    return None
 
-
-
-@orders_bp.route('/update_status/<int:id>')
+@orders_bp.route('/order/<int:id>/update')
 @login_required
 def update_status(id):
     order = Order.query.get(id)
@@ -159,7 +160,7 @@ def update_status(id):
     db.session.commit()
     return redirect(url_for('orders.show_orders'))
 
-@orders_bp.route('/edit_order/<int:id>', methods=["GET", "POST"])
+@orders_bp.route('/order/<int:id>/edit', methods=["GET", "POST"])
 @login_required
 def edit_order(id):
     order = Order.query.filter_by(id=id).first()
@@ -176,7 +177,7 @@ def edit_order(id):
         return redirect(url_for('.show_orders'))
     return render_template('edit_order.html', order=order)
 
-@orders_bp.route('/delete_order/<int:id>', methods=["POST"])
+@orders_bp.route('/order/<int:id>/delete', methods=["POST"])
 @login_required
 def delete_order(id):
     order = Order.query.get_or_404(id)

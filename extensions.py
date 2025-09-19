@@ -22,3 +22,11 @@ def role_required(required_role):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+
+# Get metadata from Woocommerce order
+def get_order_meta(order, key):
+    for meta in order.get("meta_data", []):
+        if meta["key"] == key:
+            return meta["value"]
+    return None

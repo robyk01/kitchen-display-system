@@ -1,7 +1,8 @@
 from flask import render_template, request, redirect, url_for, Blueprint, session, flash
-from extensions import db
+from extensions import db, login_required, role_required
 from models import User, Store
 from order_routes import get_wcapi
+from addons import ADDON_HANDLERS
 import requests
 
 users_bp = Blueprint('users', __name__)
@@ -21,14 +22,18 @@ users_bp = Blueprint('users', __name__)
 #     return "Register page"
 
 
-@users_bp.route("/db_users")
+@users_bp.route("/users")
+@login_required
+@role_required("admin")
 def show_users():
     users = User.query.all()
     default_user = User.query.get(session.get('user_id'))
     return render_template("users.html", page="Users", users = users, current_user=default_user)
 
 
-@users_bp.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
+@users_bp.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
+@login_required
+@role_required("admin")
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)
     store = Store.query.filter_by(user_id=user_id).first()
@@ -44,7 +49,10 @@ def edit_user(user_id):
     return render_template("edit_user.html", user=user, page=f"Edit user: {user.username}", store=store, error=error)
 
 
-@users_bp.route('/delete_user/<int:user_id>', methods = ['POST'])
+
+@users_bp.route('/user/<int:user_id>/delete', methods = ['POST'])
+@login_required
+@role_required("admin")
 def delete_user(user_id):
     user = User.query.get_or_404(user_id)
 
@@ -72,3 +80,25 @@ def check_store_connection(store):
     except requests.exceptions.RequestException:
         return "Unexpected error contacting store."
 
+
+@users_bp.route('/store/<int:id>/edit', methods=['POST', 'GET'])
+def edit_store(id):
+    user = User.query.get(session.get('user_id'))
+    store = Store.query.get(id)
+
+    form_name = request.form.get('form_name')
+    
+    if request.method == 'POST':
+        if form_name == 'store_api':
+            for field in ["api_key", "api_secret", "store_url"]:
+                setattr(user, field, request.form.get(field))
+            flash('API credentials saved!', 'success')
+        elif form_name == 'store_addons':
+            enabled_addons = request.form.getlist('addons')
+            store.addons = enabled_addons
+            flash('Addons saved!', 'success')
+
+        db.session.commit()
+                
+
+    return render_template("edit_store.html", store=store, page=f"Edit store: { store.name }", addons=ADDON_HANDLERS)

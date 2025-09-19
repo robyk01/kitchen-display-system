@@ -48,6 +48,8 @@ class Store(db.Model):
     api_secret = db.Column(db.String(100))
     store_url = db.Column(db.String(255))
 
+    addons = db.Column(db.JSON, default=[])
+
     orders = db.relationship("Order", backref="store", lazy=True)
 
 class Order(db.Model):
@@ -56,6 +58,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     woo_order_id = db.Column(db.Integer, unique=True, index=True, nullable=False)
     store_id = db.Column(db.Integer, db.ForeignKey("stores.id"), name='fk_order_store_id')
+    addons = db.Column(db.JSON, default={})
 
     status = db.Column(
         db.String(20),
@@ -66,15 +69,6 @@ class Order(db.Model):
 
     customer_name = db.Column(db.String(120))
     payment_method = db.Column(db.String(50))
-
-    delivery_method = db.Column(db.String(50))
-    delivery_date = db.Column(db.String(12))
-    delivery_time_slot = db.Column(db.String(50))
-
-    time_slot_start_time = db.Column(db.String(50))
-    time_slot_end_time = db.Column(db.String(50))
-    time_slot_fee = db.Column(db.String(50))
-
     total = db.Column(db.Numeric(10, 2))
     line_items = db.Column(db.JSON)
 
