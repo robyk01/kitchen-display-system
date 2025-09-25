@@ -7,10 +7,12 @@
 
         <div class="general-info">
             <h3>General</h3>
-            <p>Delivery method: {{ order.delivery_method }}</p>
-            <p>Delivery date: {{ order.delivery_date }}</p>
-            <p>Delivery time slot: {{ order.time_slot_start_time }} - {{ order.time_slot_end_time}}</p>
-            <p>Delivery fee: {{ order.time_slot_fee }} RON</p>
+            {% if 'delivery_date_and_time' in store.addons %}
+                <p>Delivery method: {{ order.addons.get('delivery_date_and_time', {}).get('delivery_method', None) | title }}</p>
+                <p>Delivery date: {{ order.addons.get('delivery_date_and_time', {}).get('delivery_date', None) }}</p>
+                <p>Delivery time slot: {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_start_time', None) }} - {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_end_time', None) }}</p>
+                <p>Delivery fee: {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_fee', 0) }} RON</p>
+            {% endif %}
             <div class="status">
                 <label for="status">Status</label>
                 <select name="status" id="status">
@@ -26,7 +28,13 @@
         <div class="shipping-info">
             <h3>Shipping</h3>
             <p>Customer name: {{ order.customer_name }}</p>
-            <p>Payment method: {{ order.payment_method }}</p>
+            <p>Payment method:
+                {% if order.payment_method == "cod" %}
+                    Cash on delivery
+                {% elif order.payment_method == "bacs" %}
+                    Bank transfer
+                {% endif %}
+            </p>
         </div>
         
         <div class="submit">

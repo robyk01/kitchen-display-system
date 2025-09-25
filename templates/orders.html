@@ -24,7 +24,7 @@
                 </tr>
                     {% for order in in_kitchen %}
                         <tr>
-                            {{ order_row(order, settings) }}
+                            {{ order_row(order, settings, store) }}
                         </tr>
                     {% endfor %}
             </table>
@@ -51,14 +51,14 @@
                 </tr>
                     {% for order in ready %}
                     <tr class=" {% if order in soon_orders %}soon-order{% elif order in late_orders %}late-order{% endif %}">
-                        {{ order_row(order, settings) }}
+                        {{ order_row(order, settings, store) }}
                     </tr>
                     {% endfor %}
             </table>
         {% elif settings.display_type == 'grid' %}
             <div class="order-grid">
                 {% for order in ready %}
-                    {{ order_card(order, setings) }}
+                    {{ order_card(order, settings) }}
                 {% endfor %}
             </div>
         {% endif %}

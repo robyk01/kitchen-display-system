@@ -471,6 +471,20 @@ nav.menu a.active p{
 }
 
 .order-item-details{
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.order-extra-products{
+    margin-bottom: 10px;
+}
+
+.order-extra-products:last-of-type{
+    margin-bottom: 0px;
+}
+
+.order-item-details p:nth-of-type(2), .order-extra-products{
     font-size: 14px;
     color: grey;
 }
@@ -552,7 +566,7 @@ nav.menu a.active p{
 
 .order-grid{
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
     margin-bottom: 20px;
 }
@@ -567,25 +581,34 @@ nav.menu a.active p{
 }
 
 .order-card-title{
+    display: flex;
+    justify-content: space-between;
     font-size: 20px;
     font-weight: 800;
 }
 
 .order-card-items{
     font-size: 20px;
-    margin: 10px 0px;
+    margin-top: 10px;
+}
+
+.order-card-customer{
+    margin-top: 10px;
 }
 
 .order-card-actions{
     margin-top: 10px;
     display: flex;
+    justify-content: space-between;
     gap: 5px;
 }
 
 .order-card-actions a{
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
+    width: 100%;
 }
 
 .order-card-actions form{
@@ -701,6 +724,10 @@ nav.menu a.active p{
 
 .tab-title{
     margin-bottom: 10px;
+}
+
+.tab-subtitle{
+    margin-top: 30px;
 }
 
 .tab-form{

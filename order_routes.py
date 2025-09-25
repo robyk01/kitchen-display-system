@@ -28,27 +28,31 @@ def show_orders():
     in_kitchen = [o for o in orders if o.status == "in_kitchen"]
     ready = [o for o in orders if o.status == "ready"]
 
+
     soon_orders = []
     late_orders = []
-    now = datetime.now()
-    today = date.today().isoformat()
+    if 'delivery_date_and_time' in store.addons:
+        now = datetime.now()
+        today = date.today().isoformat()
 
-    for order in ready:
-        start_time_str = order.time_slot_start_time or "23:59"  
-        end_time_str = order.time_slot_end_time or "00:00"      
+        for order in ready:
+            start_time_str = order.addons.get('delivery_date_and_time', {}).get('time_slot_end_time') or "23:59"
+            end_time_str = order.addons.get('delivery_date_and_time', {}).get('time_slot_start_time') or "00:00"
 
-        start_time = datetime.strptime(start_time_str, "%H:%M").time()
-        end_time = datetime.strptime(end_time_str, "%H:%M").time()
+            start_time = datetime.strptime(start_time_str, "%H:%M").time()
+            end_time = datetime.strptime(end_time_str, "%H:%M").time()
 
-        start_dt = datetime.combine(datetime.today(), start_time)
-        end_dt = datetime.combine(datetime.today(), end_time)
+            start_dt = datetime.combine(datetime.today(), start_time)
+            end_dt = datetime.combine(datetime.today(), end_time)
 
-        if order.delivery_date == today and start_dt - timedelta(minutes=10) <= now < end_dt:
-            soon_orders.append(order) # yellow alert
-        elif order.delivery_date == today and now >= end_dt:
-            late_orders.append(order) # red alert
+            delivery_date = order.addons.get('delivery_date_and_time', {}).get('delivery_date', None)
 
-    return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, soon_orders=soon_orders, late_orders=late_orders, settings=settings, error=error)
+            if delivery_date == today and start_dt - timedelta(minutes=10) <= now < end_dt:
+                soon_orders.append(order) # yellow alert
+            elif delivery_date == today and now >= end_dt:
+                late_orders.append(order) # red alert
+
+    return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, soon_orders=soon_orders, late_orders=late_orders, settings=settings, error=error, store=store)
 
 # Set Woocommerce API
 def get_wcapi(store):
@@ -164,6 +168,7 @@ def update_status(id):
 @login_required
 def edit_order(id):
     order = Order.query.filter_by(id=id).first()
+    store = Store.query.filter_by(user_id=session.get('user_id')).first()
 
     if not order:
         flash("Error viewing the order", "error")
@@ -175,7 +180,7 @@ def edit_order(id):
         flash("Order edited succesfully!", "success")
         db.session.commit()
         return redirect(url_for('.show_orders'))
-    return render_template('edit_order.html', order=order)
+    return render_template('edit_order.html', order=order, store=store)
 
 @orders_bp.route('/order/<int:id>/delete', methods=["POST"])
 @login_required

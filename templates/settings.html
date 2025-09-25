@@ -18,9 +18,8 @@
         </div>
 
         <div class="tab-content" id="display-content">
-            <h3 class="tab-title">Display</h3>
-
             <form method="POST" class="tab-form" id="display-form">
+                <h3 class="tab-title">Display</h3>
                 <div class="form-setting">
                     <label for="display_type">Show grid display</label>
                     <select name="display_type">
@@ -29,13 +28,24 @@
                     </select>
                 </div>
                 
-                {% for field in ['show_customer', 'show_items', 'show_payment_method', 'show_delivery_method', 'show_delivery_date', 'show_status', 'show_total'] %}
+                {% for field in ['show_customer', 'show_items', 'show_payment_method', 'show_status', 'show_total'] %}
                     <div class="form-setting" id="{{ field }}-setting">
                         <label for="{{ field }}">{{ field.replace('_', ' ').title() }} column</label>
                         <input type="checkbox" name="{{ field }}" {% if getattr(settings, field) %}checked{% endif %}>
                         <span class="checkmark"></span>
                     </div>
                 {% endfor %}
+
+                {% if 'delivery_date_and_time' in store.addons %}
+                    <h3 class="tab-subtitle">Addons</h3>
+                    {% for field in ['show_delivery_method', 'show_delivery_date', 'show_extra_products'] %}
+                        <div class="form-setting" id="{{ field }}-setting">
+                            <label for="{{ field }}">{{ field.replace('_', ' ').title() }} column</label>
+                            <input type="checkbox" name="{{ field }}" {% if getattr(settings, field) %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
 
                 <input type="hidden" name="form_name" value="display">
                 <button type="submit" class="admin-button">Save</button>

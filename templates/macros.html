@@ -1,4 +1,4 @@
-{% macro order_row(order, settings) %}
+{% macro order_row(order, settings, store) %}
     <td>{{ order.id }}</td>
 
     {% if settings.show_customer %}
@@ -8,7 +8,17 @@
     {% if settings.show_items %}
         <td class="order-items">
             {% for product in order.line_items %}
-                <p>{{ product.name }} <span class="order-item-details">{{ product.quantity }} x {{ product.price }} lei</span></p>
+                <div class="order-item-details">
+                    <p>{{ product.name }}</p>
+                    <p>{{ product.quantity }} x {{ product.price }} lei</p>
+                </div>
+                {% if settings.show_extra_products %}
+                    <div class="order-extra-products">
+                            {% for extras in order.addons.get('extra_products', {}).get(product.name, []) %}
+                                {{ extras.get('display_key') }}: {{ extras.get('display_value') }}
+                            {% endfor %}
+                    </div>
+                {% endif %}
             {% endfor %}
         </td>
     {% endif %}
@@ -24,13 +34,17 @@
     {% endif %}
 
     {% if settings.show_delivery_method %}
-        <td><p class="order-delivery-method">{% if order.delivery_method %}{{ order.delivery_method.title() }}{% else %}None{% endif %}</p></td>
+        <td><p class="order-delivery-method">
+            {{ order.addons.get('delivery_date_and_time', {}).get('delivery_method', None) | title }}
+        </p></td>
     {% endif %}
 
     {% if settings.show_delivery_date %}
         <td>
-            <p class="order-delivery-date">{{ order.delivery_date }}</p>
-            {{ order.time_slot_start_time }} - {{ order.time_slot_end_time }}
+            <p class="order-delivery-date">
+                {{ order.addons.get('delivery_date_and_time', {}).get('delivery_date', None) }}
+            </p>
+            {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_start_time', None) }} - {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_end_time', None) }}
         </td>
     {% endif %}
 
@@ -68,18 +82,27 @@
 {% endmacro %}
 
 
+
 {% macro order_card(order, settings) %}
          <div class="order-card">
             <div class="order-card-content">
-            <p class="order-card-title">Order: #{{ order.id }}</p>
+            <p class="order-card-title">
+                <span>Order: #{{ order.id }}</span>
+                <span>{{ order.addons.get('delivery_date_and_time', {}).get('time_slot_start_time', None) }} - {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_end_time', None) }}</span>
+            </p>
 
             {% for product in order.line_items %}
                 <p class="order-card-items">{{ product.quantity }} x {{ product.name }}</p>
+                {% if settings.show_extra_products %}
+                    <div class="order-extra-products">
+                            {% for extras in order.addons.get('extra_products', {}).get(product.name, []) %}
+                                {{ extras.get('display_key') }}: {{ extras.get('display_value') }}
+                            {% endfor %}
+                    </div>
+                {% endif %}
             {% endfor %}
 
-            <p>{{ order.status.replace('_', ' ').title() }}</p>
-
-            <p>{{ order.customer_name }}</p>
+            <p class="order-card-customer">{{ order.customer_name }}</p>
         </div>
 
         <div class="order-card-actions">

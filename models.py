@@ -26,15 +26,17 @@ class Settings(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), name='fk_settings_user_id')
     user = relationship("User", back_populates="settings")
 
+    display_type = db.Column(db.String(20), default="grid")
+
     show_customer = db.Column(db.Boolean, default=True)
     show_items = db.Column(db.Boolean, default=True)
     show_payment_method = db.Column(db.Boolean, default=True)
-    show_delivery_method = db.Column(db.Boolean, default=True)
-    show_delivery_date = db.Column(db.Boolean, default=True)
     show_status = db.Column(db.Boolean, default=True)
     show_total = db.Column(db.Boolean, default=True)
 
-    display_type = db.Column(db.String(20), default="grid")
+    show_delivery_method = db.Column(db.Boolean, default=False)
+    show_delivery_date = db.Column(db.Boolean, default=False)
+    show_extra_products = db.Column(db.Boolean, default=False)
 
 
 class Store(db.Model):

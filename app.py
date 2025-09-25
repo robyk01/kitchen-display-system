@@ -112,7 +112,7 @@ def settings():
 
         if form_name == 'display':
             setattr(settings, 'display_type', request.form.get('display_type'))
-            for field in ['show_customer', 'show_items', 'show_payment_method', 'show_delivery_method', 'show_delivery_date', 'show_status', 'show_total']:
+            for field in ['show_customer', 'show_items', 'show_payment_method', 'show_delivery_method', 'show_delivery_date', 'show_status', 'show_total', 'show_extra_products']:
                 setattr(settings, field, bool(request.form.get(field)))
 
         db.session.commit()
