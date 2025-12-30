@@ -16,7 +16,7 @@ body{
 .container{
     display: grid;
     grid-template-columns: 1fr 5fr;
-    background-color: #f5f5f5;
+    background-color: #1d1d1dff;
     min-height: 100vh;
 }
 
@@ -156,19 +156,20 @@ nav.menu a.active p{
     align-items: center;
     padding: 5px;
     margin-left: 20px;
-    color: black;
+    color: white;
     border-radius: 12px;
     transition: all 0.2s ease;
 }
 
 .settings-icon:hover{
-    background-color: #e4e4e4;
+    background-color: #383838ff;
 }
 
 .header-time{
     font-size: 32px;
     border-right: 1px solid grey;
     padding-right: 20px;
+    color: white;
 }
 
 /* login */
@@ -215,6 +216,10 @@ nav.menu a.active p{
     grid-template-rows: auto 1fr;
     gap: 15px;
     margin: 30px;
+}
+
+.home-content h1{
+    color: white;
 }
 
 .cards{
@@ -285,8 +290,13 @@ nav.menu a.active p{
     margin: 30px;
 }
 
+.db-content h1{
+    color: white;
+}
+
 .db-content h2{
     margin-bottom: 15px;
+    color: white;
 }
 
 .db-users{
@@ -357,6 +367,10 @@ nav.menu a.active p{
 
 .edit-user-content{
     margin: 30px;
+}
+
+.edit-user-content h1{
+    color: white;
 }
 
 .edit-user-content h2{
@@ -430,11 +444,23 @@ nav.menu a.active p{
     margin: 30px;
 }
 
+.edit-store-content h1{
+    color: white;
+}
+
 
 /* orders list */
 
 .orders-content{
     margin: 30px;
+}
+
+.orders-content h1{
+    color: white;
+}
+
+.orders-content h2{
+    color: lightgrey;
 }
 
 .orders-content h2{
@@ -696,16 +722,20 @@ nav.menu a.active p{
     margin: 30px;
 }
 
+.settings-content h1{
+    color: white;
+}
+
 .settings-tab-buttons{
     width: 100%;
     border-bottom: 1px solid lightgrey;
-    margin-bottom: 20px;
+
 }
 
 .settings-tab{
     background-color: white;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 0 8px 8px 8px;
     box-shadow: 0px 0px 40px -20px rgba(0,0,0,0.2);
 }
 

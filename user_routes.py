@@ -60,9 +60,12 @@ def delete_user(user_id):
     db.session.commit()
 
     flash("User deleted succesfully!", "success")
-    return redirect(url_for('.db_users'))
+    return redirect(url_for('.db_users'))   
 
 def check_store_connection(store):
+    if store is None:
+        return "No store linked to this user yet."
+
     if not store.api_key or not store.api_secret or not store.store_url:
         return "Store credentials missing."
     
@@ -91,7 +94,7 @@ def edit_store(id):
     if request.method == 'POST':
         if form_name == 'store_api':
             for field in ["api_key", "api_secret", "store_url"]:
-                setattr(user, field, request.form.get(field))
+                setattr(store, field, request.form.get(field))
             flash('API credentials saved!', 'success')
         elif form_name == 'store_addons':
             enabled_addons = request.form.getlist('addons')

@@ -50,23 +50,38 @@ class Store(db.Model):
     api_secret = db.Column(db.String(100))
     store_url = db.Column(db.String(255))
 
-    addons = db.Column(db.JSON, default=[])
+    addons = db.Column(db.JSON, default=list)
 
-    orders = db.relationship("Order", backref="store", lazy=True)
+    orders = db.relationship(
+        "Order",
+        backref="store",
+        lazy=True,
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
 
 class Order(db.Model):
     __tablename__ = 'orders'
+    __table_args__ = (
+        db.UniqueConstraint('fk_order_store_id', 'woo_order_id', name='uq_orders_store_woo_order'),
+    )
 
     id = db.Column(db.Integer, primary_key=True)
-    woo_order_id = db.Column(db.Integer, unique=True, index=True, nullable=False)
-    store_id = db.Column(db.Integer, db.ForeignKey("stores.id"), name='fk_order_store_id')
-    addons = db.Column(db.JSON, default={})
+    woo_order_id = db.Column(db.Integer, index=True, nullable=False)
+    addons = db.Column(db.JSON, default=dict)
 
     status = db.Column(
         db.String(20),
         nullable=False,
         default="in_kitchen",
         server_default="in_kitchen"
+    )
+
+    store_id = db.Column(
+        "fk_order_store_id",
+        db.Integer,
+        db.ForeignKey("stores.id", name="fk_order_store_id", ondelete="CASCADE"),
+        nullable=False,
     )
 
     customer_name = db.Column(db.String(120))
