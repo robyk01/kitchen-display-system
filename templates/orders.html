@@ -35,6 +35,8 @@
                 {% endfor %}
             </div>
         {% endif %}
+
+
         <h2>Completed orders</h2>
         {% if settings.display_type == 'list' %}
             <table class="orders" id="completed-orders">
@@ -58,6 +60,35 @@
         {% elif settings.display_type == 'grid' %}
             <div class="order-grid">
                 {% for order in ready %}
+                    {{ order_card(order, settings) }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+
+        <h2>Delivered orders</h2>
+        {% if settings.display_type == 'list' %}
+            <table class="orders" id="delivered-orders">
+                <tr>
+                    <th>#</th>
+                    {% if settings.show_customer %}<th>Customer</th>{% endif %}
+                    {% if settings.show_items %}<th>Items</th>{% endif %}
+                    {% if settings.show_payment_method %}<th>Payment Method</th>{% endif %}
+                    {% if settings.show_delivery_method %}<th>Delivery Method</th>{% endif %}
+                    {% if settings.show_delivery_date %}<th>Delivery Date</th>{% endif %}
+                    {% if settings.show_status %}<th>Status</th>{% endif %}
+                    {% if settings.show_total %}<th>Total</th>{% endif %}
+                    <th>Actions</th>
+                </tr>
+                    {% for order in delivered %}
+                    <tr>
+                        {{ order_row(order, settings, store) }}
+                    </tr>
+                    {% endfor %}
+            </table>
+        {% elif settings.display_type == 'grid' %}
+            <div class="order-grid">
+                {% for order in delivered %}
                     {{ order_card(order, settings) }}
                 {% endfor %}
             </div>

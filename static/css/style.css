@@ -580,6 +580,10 @@ nav.menu a.active p{
     margin-bottom: 30px;
 }
 
+#completed-orders{
+    margin-bottom: 30px;
+}
+
 .soon-order {
     background-color: #FFF8E1;
 }

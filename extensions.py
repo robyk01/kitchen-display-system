@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from functools import wraps
 from flask import redirect, url_for, session
+from datetime import datetime, date, timedelta, timezone
 
 db = SQLAlchemy()
 
@@ -30,3 +31,13 @@ def get_order_meta(order, key):
         if meta["key"] == key:
             return meta["value"]
     return None
+
+# helper function to parse the date
+def parse_datetime(dt_str):
+    if not dt_str:
+        return None
+    
+    try:
+        return datetime.fromisoformat(dt_str.replace("Z", "+00:00")).replace(tzinfo=None)
+    except ValueError:
+        return None

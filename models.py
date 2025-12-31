@@ -84,6 +84,9 @@ class Order(db.Model):
         nullable=False,
     )
 
+    created_at = db.Column(db.DateTime, index=True)
+    delivered_at = db.Column(db.DateTime, index=True)
+
     customer_name = db.Column(db.String(120))
     payment_method = db.Column(db.String(50))
     total = db.Column(db.Numeric(10, 2))

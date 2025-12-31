@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, Blueprint, sessio
 from extensions import db
 from models import Order, User, Store
 from woocommerce import API
-from extensions import login_required
+from extensions import login_required, parse_datetime
 from datetime import datetime, date, timedelta
 from addons import ADDON_HANDLERS
 import requests
@@ -24,16 +24,28 @@ def show_orders():
     else:
         sync_orders_from_woo(woo_orders, store)
         orders = store.orders
+
+    def sort_key(o):
+        return o.created_at or datetime.min
+    
+    orders = sorted(orders, key=sort_key, reverse=True)
     
     in_kitchen = [o for o in orders if o.status == "in_kitchen"]
     ready = [o for o in orders if o.status == "ready"]
 
+    today = date.today()
+    delivered_today = [
+        o for o in orders
+        if o.status == "delivered"
+        and o.delivered_at is not None
+        and o.delivered_at.date() == today
+    ]
 
     soon_orders = []
     late_orders = []
-    if 'delivery_date_and_time' in store.addons:
+    if store and 'delivery_date_and_time' in store.addons:
         now = datetime.now()
-        today = date.today().isoformat()
+        today_str = today.isoformat()
 
         for order in ready:
             start_time_str = order.addons.get('delivery_date_and_time', {}).get('time_slot_end_time') or "23:59"
@@ -47,12 +59,12 @@ def show_orders():
 
             delivery_date = order.addons.get('delivery_date_and_time', {}).get('delivery_date', None)
 
-            if delivery_date == today and start_dt - timedelta(minutes=10) <= now < end_dt:
+            if delivery_date == today_str and start_dt - timedelta(minutes=10) <= now < end_dt:
                 soon_orders.append(order) # yellow alert
-            elif delivery_date == today and now >= end_dt:
+            elif delivery_date == today_str and now >= end_dt:
                 late_orders.append(order) # red alert
 
-    return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, soon_orders=soon_orders, late_orders=late_orders, settings=settings, error=error, store=store)
+    return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, delivered=delivered_today, soon_orders=soon_orders, late_orders=late_orders, settings=settings, error=error, store=store)
 
 # Set Woocommerce API
 def get_wcapi(store):
@@ -121,18 +133,28 @@ def sync_orders_from_woo(woo_orders, store):
                 "total": w["total"],
                 "line_items": w["line_items"],
                 "status": status,
-                "addons": addon_data
+                "addons": addon_data,
+                "created_at": parse_datetime(w.get("date_created")),
             }
 
             if not existing:
-                db.session.add(Order(woo_order_id=w["id"], **data))
+                new_order = Order(woo_order_id=w["id"], **data)
+                if status == "delivered":
+                    new_order.delivered_at = datetime.now()
+                db.session.add(new_order)
+
             else:
+                prev_status = existing.status
+
                 for key, value in data.items():
                     if key == 'status':
                         if existing.status == 'ready' and value not in ['delivered', 'cancelled', 'completed']:
                             continue
                     
                     setattr(existing, key, value)
+
+                if prev_status != "delivered" and existing.status == "delivered" and existing.delivered_at is None:
+                    existing.delivered_at = datetime.now()
 
         orders = store.orders
 
@@ -157,6 +179,10 @@ def update_status(id):
         order.status = 'ready'
     elif order.status == 'ready':
         order.status = 'delivered'
+
+        if order.delivered_at is None:
+            order.delivered_at = datetime.now()
+
         data = {"status": "completed"}
         wcapi.put(f"orders/{order.woo_order_id}", data).json()
 
