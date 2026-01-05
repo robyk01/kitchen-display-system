@@ -26,7 +26,7 @@
                     </select>
                 </div>
 
-                <button type="submit" class="admin-button">{{ t("update") }}</button>
+                <button type="submit" class="admin-button">{{ t("save") }}</button>
             </form>
         </div>
 
@@ -34,7 +34,7 @@
             <form method="POST" class="tab-form" id="display-form">
                 <h3 class="tab-title">Display</h3>
                 <div class="form-setting">
-                    <label for="display_type">Show grid display</label>
+                    <label for="display_type">{{ t('show_grid') }}</label>
                     <select name="display_type">
                         <option value="grid" {% if settings.display_type == "grid" %}selected{% endif %}>Grid</option>
                         <option value="list" {% if settings.display_type == "list" %}selected{% endif %}>List</option>
@@ -43,7 +43,7 @@
                 
                 {% for field in ['show_customer', 'show_items', 'show_payment_method', 'show_status', 'show_total'] %}
                     <div class="form-setting" id="{{ field }}-setting">
-                        <label for="{{ field }}">{{ field.replace('_', ' ').title() }} column</label>
+                        <label for="{{ field }}">{{ t(field) }}</label>
                         <input type="checkbox" name="{{ field }}" {% if getattr(settings, field) %}checked{% endif %}>
                         <span class="checkmark"></span>
                     </div>
@@ -61,7 +61,7 @@
                 {% endif %}
 
                 <input type="hidden" name="form_name" value="display">
-                <button type="submit" class="admin-button">Save</button>
+                <button type="submit" class="admin-button">{{ t('save') }}</button>
             </form>
         </div>
     </div>

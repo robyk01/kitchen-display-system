@@ -129,7 +129,9 @@ def settings():
 
         db.session.commit()
 
-    return render_template("settings.html", page="Settings", settings=settings, getattr=getattr, user=user, store=store)
+    page = t("settings")
+
+    return render_template("settings.html", page=page, settings=settings, getattr=getattr, user=user, store=store)
 
 
 @app.route("/users/<string:username>")

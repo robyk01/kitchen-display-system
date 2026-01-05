@@ -50,7 +50,7 @@
 
     {% if settings.show_status %}
         <td>
-            {{ order.status.replace('_', ' ').title() }}
+            {{ t(order.status) }}
         </td>
     {% endif %}
                         

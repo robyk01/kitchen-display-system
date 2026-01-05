@@ -26,8 +26,22 @@ translations = {
         "cod": "Cash on Delivery",
         "bacs": "Bank Transfer",
 
+        "in_kitchen": "In Kitchen",
+        "ready": "Ready",
+        "delivered": "Delivered",
+
+        "settings": "Settings",
         "back_to_orders": "Back",
-        "language": "Language"
+        "save": "Save",
+        "language": "Language",
+        "display": "Display",
+        "show_grid": "Change grid/list mode",
+        "show_customer": "Show Customer column",
+        "show_items": "Show Items column",
+        "show_payment_method": "Show Payment Method column",
+        "show_status": "Show Status column",
+        "show_total": "Show Total column",
+
     },
     "ro": {
         "order": "Comandă",
@@ -54,8 +68,21 @@ translations = {
         "cod": "Cash",
         "bacs": "Transfer bancar",
 
+        "in_kitchen": "În preparare",
+        "ready": "Finalizată",
+        "delivered": "Livrată",
+
+        "settings": "Setări",
         "back_to_orders": "Înapoi",
-        "language": "Limbă"
+        "language": "Limbă",
+        "save": "Salvează",
+        "display": "Afișaj",
+        "show_grid": "Schimbă afișare listă/tabelar",
+        "show_customer": "Afișare coloană client",
+        "show_items": "Afișare coloană produse",
+        "show_payment_method": "Afișare coloană metodă plată",
+        "show_status": "Afișare coloană status",
+        "show_total": "Afișare coloană preț total",
     }
 }
 
