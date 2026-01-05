@@ -14,7 +14,11 @@ orders_bp = Blueprint('orders', __name__)
 def show_orders():
     user = User.query.get(session.get('user_id'))
     settings = user.settings
+
     store = Store.query.filter_by(user_id=session.get('user_id')).first()
+
+    if not store:
+        return "Store is not set up."
 
     woo_orders, error = fetch_woo_orders(store)
 
@@ -43,7 +47,8 @@ def show_orders():
 
     soon_orders = []
     late_orders = []
-    if store and 'delivery_date_and_time' in store.addons:
+
+    if store and store.addons and 'delivery_date_and_time' in store.addons:
         now = datetime.now()
         today_str = today.isoformat()
 
@@ -81,7 +86,7 @@ def fetch_woo_orders(store):
     
     try:
         wcapi = get_wcapi(store)
-        response = wcapi.get("orders", params={"orderby": "date", "order": "desc", "status": "pending, on-hold, processing, cancelled, completed"})
+        response = wcapi.get("orders", params={"orderby": "date", "order": "desc", "status": "pending,on-hold,processing,cancelled,completed"})
         response.raise_for_status()
         return response.json(), None
     except requests.exceptions.HTTPError as e:
@@ -148,7 +153,7 @@ def sync_orders_from_woo(woo_orders, store):
 
                 for key, value in data.items():
                     if key == 'status':
-                        if existing.status == 'ready' and value not in ['delivered', 'cancelled', 'completed']:
+                        if existing.status == 'ready' and value not in ['delivered', 'cancelled']:
                             continue
                     
                     setattr(existing, key, value)
@@ -159,7 +164,7 @@ def sync_orders_from_woo(woo_orders, store):
         orders = store.orders
 
         for o in orders:
-            if o.woo_order_id not in woo_ids:
+            if o.status in ["in_kitchen", "ready"] and o.woo_order_id not in woo_ids:
                 o.status = 'deleted'
 
         flash('Orders fetched succesfully!', 'success')
@@ -173,7 +178,13 @@ def sync_orders_from_woo(woo_orders, store):
 def update_status(id):
     order = Order.query.get(id)
     store = Store.query.filter_by(user_id=session.get('user_id')).first()
+
     wcapi = get_wcapi(store)
+
+    if wcapi is None:
+        flash("WOO API error", 'error')
+        return redirect(url_for('orders.show_orders'))
+    
 
     if order.status == 'in_kitchen':
         order.status = 'ready'
@@ -190,30 +201,47 @@ def update_status(id):
     db.session.commit()
     return redirect(url_for('orders.show_orders'))
 
+
+
 @orders_bp.route('/order/<int:id>/edit', methods=["GET", "POST"])
 @login_required
 def edit_order(id):
     order = Order.query.filter_by(id=id).first()
-    store = Store.query.filter_by(user_id=session.get('user_id')).first()
-
     if not order:
         flash("Error viewing the order", "error")
         return redirect(url_for('orders.show_orders'))
 
+    store = Store.query.filter_by(user_id=session.get('user_id')).first()
+    if not store:
+        flash("Store is not set up", "error")
+        return redirect(url_for('orders.show_orders'))
+
+
     if request.method == 'POST':
+        prev_status = order.status
         order.status = request.form.get('status')
+
+        if prev_status != 'delivered' and order.status == 'delivered' and order.delivered_at is None:
+            order.delivered_at = datetime.now()
 
         flash("Order edited succesfully!", "success")
         db.session.commit()
         return redirect(url_for('.show_orders'))
     return render_template('edit_order.html', order=order, store=store)
 
+
+
 @orders_bp.route('/order/<int:id>/delete', methods=["POST"])
 @login_required
 def delete_order(id):
     order = Order.query.get_or_404(id)
     store = Store.query.filter_by(user_id=session.get('user_id')).first()
+
     wcapi = get_wcapi(store)
+
+    if wcapi is None:
+        flash("WOO API error", 'error')
+        return redirect(url_for('orders.show_orders'))
 
     data = {"status": "cancelled"}
     wcapi.put(f"orders/{order.woo_order_id}", data).json()
