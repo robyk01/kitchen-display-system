@@ -5,6 +5,7 @@ from woocommerce import API
 from extensions import login_required, parse_datetime
 from datetime import datetime, date, timedelta
 from addons import ADDON_HANDLERS
+from i18n import t
 import requests
 
 orders_bp = Blueprint('orders', __name__)
@@ -69,7 +70,9 @@ def show_orders():
             elif delivery_date == today_str and now >= end_dt:
                 late_orders.append(order) # red alert
 
-    return render_template("orders.html", page='Orders', in_kitchen=in_kitchen, ready=ready, delivered=delivered_today, soon_orders=soon_orders, late_orders=late_orders, settings=settings, error=error, store=store)
+    page = t("orders")
+
+    return render_template("orders.html", page=page, in_kitchen=in_kitchen, ready=ready, delivered=delivered_today, soon_orders=soon_orders, late_orders=late_orders, settings=settings, error=error, store=store)
 
 # Set Woocommerce API
 def get_wcapi(store):
@@ -86,7 +89,7 @@ def fetch_woo_orders(store):
     
     try:
         wcapi = get_wcapi(store)
-        response = wcapi.get("orders", params={"orderby": "date", "order": "desc", "status": "pending,on-hold,processing,cancelled,completed"})
+        response = wcapi.get("orders", params={"orderby": "date", "order": "desc", "status": "pending,on-hold,processing,cancelled,completed", "per_page": 100})
         response.raise_for_status()
         return response.json(), None
     except requests.exceptions.HTTPError as e:
@@ -126,7 +129,7 @@ def sync_orders_from_woo(woo_orders, store):
             status = woo_to_kds.get(w["status"], "in_kitchen")
 
             addon_data = {}
-            for addon in store.addons:
+            for addon in (store.addons or []):
                 handler = ADDON_HANDLERS.get(addon)
                 if handler:
                     addon_data[addon] = handler(w)

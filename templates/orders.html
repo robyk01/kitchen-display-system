@@ -8,19 +8,19 @@
     {% if error %}
     <p class="order-error">{{ error }}</p>
     {% else %}
-        <h2>Live orders</h2>
+        <h2>{{ t("live_orders") }}</h2>
         {% if settings.display_type == 'list' %}
             <table class="orders" id="live-orders">
                 <tr>
                     <th>#</th>
-                    {% if settings.show_customer %}<th>Customer</th>{% endif %}
-                    {% if settings.show_items %}<th>Items</th>{% endif %}
-                    {% if settings.show_payment_method %}<th>Payment Method</th>{% endif %}
-                    {% if settings.show_delivery_method %}<th>Delivery Method</th>{% endif %}
-                    {% if settings.show_delivery_date %}<th>Delivery Date</th>{% endif %}
-                    {% if settings.show_status %}<th>Status</th>{% endif %}
-                    {% if settings.show_total %}<th>Total</th>{% endif %}
-                    <th>Actions</th>
+                    {% if settings.show_customer %}<th>{{ t("customer") }}</th>{% endif %}
+                    {% if settings.show_items %}<th>{{ t("items") }}</th>{% endif %}
+                    {% if settings.show_payment_method %}<th>{{ t("payment_method") }}</th>{% endif %}
+                    {% if settings.show_delivery_method %}<th>{{ t("delivery_method") }}</th>{% endif %}
+                    {% if settings.show_delivery_date %}<th>{{ t("delivery_date") }}</th>{% endif %}
+                    {% if settings.show_status %}<th>{{ t("status") }}</th>{% endif %}
+                    {% if settings.show_total %}<th>{{ t("total") }}</th>{% endif %}
+                    <th>{{ t("actions") }}</th>
                 </tr>
                     {% for order in in_kitchen %}
                         <tr>
@@ -37,19 +37,19 @@
         {% endif %}
 
 
-        <h2>Completed orders</h2>
+        <h2>{{ t("completed_orders") }}</h2>
         {% if settings.display_type == 'list' %}
             <table class="orders" id="completed-orders">
                 <tr>
                     <th>#</th>
-                    {% if settings.show_customer %}<th>Customer</th>{% endif %}
-                    {% if settings.show_items %}<th>Items</th>{% endif %}
-                    {% if settings.show_payment_method %}<th>Payment Method</th>{% endif %}
-                    {% if settings.show_delivery_method %}<th>Delivery Method</th>{% endif %}
-                    {% if settings.show_delivery_date %}<th>Delivery Date</th>{% endif %}
-                    {% if settings.show_status %}<th>Status</th>{% endif %}
-                    {% if settings.show_total %}<th>Total</th>{% endif %}
-                    <th>Actions</th>
+                    {% if settings.show_customer %}<th>{{ t("customer") }}</th>{% endif %}
+                    {% if settings.show_items %}<th>{{ t("items") }}</th>{% endif %}
+                    {% if settings.show_payment_method %}<th>{{ t("payment_method") }}</th>{% endif %}
+                    {% if settings.show_delivery_method %}<th>{{ t("delivery_method") }}</th>{% endif %}
+                    {% if settings.show_delivery_date %}<th>{{ t("delivery_date") }}</th>{% endif %}
+                    {% if settings.show_status %}<th>{{ t("status") }}</th>{% endif %}
+                    {% if settings.show_total %}<th>{{ t("total") }}</th>{% endif %}
+                    <th>{{ t("actions") }}</th>
                 </tr>
                     {% for order in ready %}
                     <tr class=" {% if order in soon_orders %}soon-order{% elif order in late_orders %}late-order{% endif %}">
@@ -66,19 +66,19 @@
         {% endif %}
 
 
-        <h2>Delivered orders</h2>
+        <h2>{{ t("delivered_orders") }}</h2>
         {% if settings.display_type == 'list' %}
             <table class="orders" id="delivered-orders">
                 <tr>
                     <th>#</th>
-                    {% if settings.show_customer %}<th>Customer</th>{% endif %}
-                    {% if settings.show_items %}<th>Items</th>{% endif %}
-                    {% if settings.show_payment_method %}<th>Payment Method</th>{% endif %}
-                    {% if settings.show_delivery_method %}<th>Delivery Method</th>{% endif %}
-                    {% if settings.show_delivery_date %}<th>Delivery Date</th>{% endif %}
-                    {% if settings.show_status %}<th>Status</th>{% endif %}
-                    {% if settings.show_total %}<th>Total</th>{% endif %}
-                    <th>Actions</th>
+                    {% if settings.show_customer %}<th>{{ t("customer") }}</th>{% endif %}
+                    {% if settings.show_items %}<th>{{ t("items") }}</th>{% endif %}
+                    {% if settings.show_payment_method %}<th>{{ t("payment_method") }}</th>{% endif %}
+                    {% if settings.show_delivery_method %}<th>{{ t("delivery_method") }}</th>{% endif %}
+                    {% if settings.show_delivery_date %}<th>{{ t("delivery_date") }}</th>{% endif %}
+                    {% if settings.show_status %}<th>{{ t("status") }}</th>{% endif %}
+                    {% if settings.show_total %}<th>{{ t("total") }}</th>{% endif %}
+                    <th>{{ t("actions") }}</th>
                 </tr>
                     {% for order in delivered %}
                     <tr>

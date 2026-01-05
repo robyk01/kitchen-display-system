@@ -25,6 +25,7 @@ class Settings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), name='fk_settings_user_id')
     user = relationship("User", back_populates="settings")
+    language = db.Column(db.String(5), nullable=False, server_default="ro", default="ro")
 
     display_type = db.Column(db.String(20), default="grid")
 

@@ -6,10 +6,13 @@ from models import User, Settings, Store
 from order_routes import orders_bp
 from user_routes import users_bp
 from datetime import datetime
+from i18n import t
 
 
 app = Flask(__name__)
 app.secret_key = 'secretkey'
+
+app.jinja_env.globals["t"] = t
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -48,6 +51,11 @@ def login():
             session['user_id'] = user.id
             session['role'] = user.role
 
+            lang = "ro"
+            if user.settings and getattr(user.settings, "language", None):
+                lang = user.settings.language
+            session["lang"] = lang
+
             flash("Welcome!", "success")
 
             if session['role'] == 'admin':
@@ -62,6 +70,7 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop("user_id", None)
+    session.pop("lang", None)
     return redirect(url_for('.login'))
 
 
@@ -107,8 +116,11 @@ def settings():
 
     if request.method == 'POST':
         if form_name == 'general':
-            for field in ["api_key", "api_secret", "store_url"]:
-                setattr(user, field, request.form.get(field))
+            lang = request.form.get("language")
+            if lang not in ("ro", "en"):
+                lang = "ro"
+            settings.language = lang
+            session["lang"] = lang
 
         if form_name == 'display':
             setattr(settings, 'display_type', request.form.get('display_type'))
