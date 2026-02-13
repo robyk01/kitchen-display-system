@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, Blueprint, session, flash
+from flask import render_template, request, redirect, url_for, Blueprint, session, flash, jsonify
 from extensions import db
 from models import Order, User, Store
 from woocommerce import API
@@ -7,6 +7,7 @@ from datetime import datetime, date, timedelta
 from addons import ADDON_HANDLERS
 from i18n import t
 import requests
+import hashlib
 
 orders_bp = Blueprint('orders', __name__)
 
@@ -20,15 +21,19 @@ def show_orders():
 
     if not store:
         return "Store is not set up."
+    
+    error = None
+    orders = store.orders
 
-    woo_orders, error = fetch_woo_orders(store)
+    # Removed due to background job sync
+    # woo_orders, error = fetch_woo_orders(store)
 
-    if error:
-        flash(error, "error")
-        orders = []
-    else:
-        sync_orders_from_woo(woo_orders, store)
-        orders = store.orders
+    # if error:
+    #     flash(error, "error")
+    #     orders = []
+    # else:
+    #     sync_orders_from_woo(woo_orders, store)
+    #     orders = store.orders
 
     def sort_key(o):
         return o.created_at or datetime.min
@@ -54,8 +59,8 @@ def show_orders():
         today_str = today.isoformat()
 
         for order in ready:
-            start_time_str = order.addons.get('delivery_date_and_time', {}).get('time_slot_end_time') or "23:59"
-            end_time_str = order.addons.get('delivery_date_and_time', {}).get('time_slot_start_time') or "00:00"
+            start_time_str = order.addons.get('delivery_date_and_time', {}).get('time_slot_start_time') or "23:59"
+            end_time_str = order.addons.get('delivery_date_and_time', {}).get('time_slot_end_time') or "00:00"
 
             start_time = datetime.strptime(start_time_str, "%H:%M").time()
             end_time = datetime.strptime(end_time_str, "%H:%M").time()
@@ -103,73 +108,76 @@ def fetch_woo_orders(store):
 
 
 # Sync order from Woocommerce to database
-def sync_orders_from_woo(woo_orders, store):
+def sync_orders_from_woo(woo_orders, store, with_flash=True):
     if not woo_orders:
-        flash('Cannot fetch orders', 'error')
-    else:
-        woo_ids = [w["id"] for w in woo_orders]
-        existing_orders = {
-            o.woo_order_id: o 
-            for o in Order.query.filter(
-                Order.woo_order_id.in_(woo_ids),
-                Order.store_id == store.id
-                ).all()}
+        if with_flash:
+            flash('Cannot fetch orders', 'error')
+        return
 
-        woo_to_kds = {
-            "pending": "in_kitchen",
-            "on-hold": "in_kitchen",
-            "processing": "in_kitchen",
-            "completed": "delivered",
-            "cancelled": "cancelled"
+    woo_ids = [w["id"] for w in woo_orders]
+    existing_orders = {
+        o.woo_order_id: o 
+        for o in Order.query.filter(
+            Order.woo_order_id.in_(woo_ids),
+            Order.store_id == store.id
+            ).all()}
+
+    woo_to_kds = {
+        "pending": "in_kitchen",
+        "on-hold": "in_kitchen",
+        "processing": "in_kitchen",
+        "completed": "delivered",
+        "cancelled": "cancelled"
+    }
+
+
+    for w in woo_orders:
+        existing = existing_orders.get(w["id"])
+        status = woo_to_kds.get(w["status"], "in_kitchen")
+
+        addon_data = {}
+        for addon in (store.addons or []):
+            handler = ADDON_HANDLERS.get(addon)
+            if handler:
+                addon_data[addon] = handler(w)
+
+        data = {
+            "store_id": store.id,
+            "customer_name": f"{w['billing']['first_name']} {w['billing']['last_name']}",
+            "payment_method": w["payment_method"],
+            "total": w["total"],
+            "line_items": w["line_items"],
+            "status": status,
+            "addons": addon_data,
+            "created_at": parse_datetime(w.get("date_created")),
         }
 
+        if not existing:
+            new_order = Order(woo_order_id=w["id"], **data)
+            if status == "delivered":
+                new_order.delivered_at = datetime.now()
+            db.session.add(new_order)
 
-        for w in woo_orders:
-            existing = existing_orders.get(w["id"])
-            status = woo_to_kds.get(w["status"], "in_kitchen")
+        else:
+            prev_status = existing.status
 
-            addon_data = {}
-            for addon in (store.addons or []):
-                handler = ADDON_HANDLERS.get(addon)
-                if handler:
-                    addon_data[addon] = handler(w)
+            for key, value in data.items():
+                if key == 'status':
+                    if existing.status == 'ready' and value not in ['delivered', 'cancelled']:
+                        continue
+                
+                setattr(existing, key, value)
 
-            data = {
-                "store_id": store.id,
-                "customer_name": f"{w['billing']['first_name']} {w['billing']['last_name']}",
-                "payment_method": w["payment_method"],
-                "total": w["total"],
-                "line_items": w["line_items"],
-                "status": status,
-                "addons": addon_data,
-                "created_at": parse_datetime(w.get("date_created")),
-            }
-
-            if not existing:
-                new_order = Order(woo_order_id=w["id"], **data)
-                if status == "delivered":
-                    new_order.delivered_at = datetime.now()
-                db.session.add(new_order)
-
-            else:
-                prev_status = existing.status
-
-                for key, value in data.items():
-                    if key == 'status':
-                        if existing.status == 'ready' and value not in ['delivered', 'cancelled']:
-                            continue
-                    
-                    setattr(existing, key, value)
-
-                if prev_status != "delivered" and existing.status == "delivered" and existing.delivered_at is None:
-                    existing.delivered_at = datetime.now()
+            if prev_status != "delivered" and existing.status == "delivered" and existing.delivered_at is None:
+                existing.delivered_at = datetime.now()
 
         orders = store.orders
 
-        for o in orders:
-            if o.status in ["in_kitchen", "ready"] and o.woo_order_id not in woo_ids:
-                o.status = 'deleted'
+    for o in orders:
+        if o.status in ["in_kitchen", "ready"] and o.woo_order_id not in woo_ids:
+            o.status = 'deleted'
 
+    if with_flash:
         flash('Orders fetched succesfully!', 'success')
         
     db.session.commit()
@@ -256,18 +264,38 @@ def delete_order(id):
     return redirect(url_for('.show_orders'))
 
 
+@orders_bp.route("/orders/poll")
+@login_required
+def poll_orders():
+    store = Store.query.filter_by(user_id=session.get("user_id")).first()
+    if not store:
+        return jsonify({"error": "Store is not set up."}), 400
 
-# @orders_bp.route("/add_order", methods=["GET", "POST"])
-# def add_order():
-#     if request.method == "POST":
-#         user = User.query.filter_by(email="roberto@gmail.com").first()
-#         items = request.form.get("items")
-#         total_price = request.form.get("total_price")
+    orders = store.orders
+    today = date.today()
 
-#         new_order = Order(user_id=user.id, items=items, total_price=total_price)
-#         db.session.add(new_order)
-#         db.session.commit()
+    in_kitchen_ids = sorted([o.id for o in orders if o.status == "in_kitchen"])
+    ready_ids = sorted([o.id for o in orders if o.status == "ready"])
+    delivered_today_ids = sorted([
+        o.id for o in orders
+        if o.status == "delivered"
+        and o.delivered_at is not None
+        and o.delivered_at.date() == today
+    ])
 
-#         return redirect(url_for('.orders'))
+    source = (
+        f"ik:{','.join(map(str, in_kitchen_ids))}|"
+        f"r:{','.join(map(str, ready_ids))}|"
+        f"d:{','.join(map(str, delivered_today_ids))}"
+    )
 
-#     return render_template("add_order.html")
+    signature = hashlib.sha1(source.encode("utf-8")).hexdigest()
+    return jsonify({
+        "signature": signature,
+        "in_kitchen_count": len(in_kitchen_ids),
+        "ready_count": len(ready_ids),
+        "delivered_today_count": len(delivered_today_ids),
+    })
+
+
+

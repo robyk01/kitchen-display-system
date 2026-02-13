@@ -7,6 +7,7 @@ from order_routes import orders_bp
 from user_routes import users_bp
 from datetime import datetime
 from i18n import t
+from jobs import init_scheduler
 
 
 app = Flask(__name__)
@@ -142,6 +143,8 @@ def user_page(username):
 
 with app.app_context():
     db.create_all()
+
+init_scheduler(app)
 
 if __name__ == '__main__':
     app.run(debug=True)

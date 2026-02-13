@@ -1,0 +1,5 @@
+{
+  "python.defaultInterpreterPath": "/Users/Roberto/Documents/projects/kds/.venv/bin/python",
+  "python.analysis.venvPath": "/Users/Roberto/Documents/projects/kds",
+  "python.analysis.venv": ".venv"
+}

@@ -1,4 +1,5 @@
 from flask import session
+from typing import Optional
 
 translations = {
     "en": {
@@ -115,7 +116,7 @@ translations = {
 def get_lang(default="ro"):
     return session.get("lang", default)
 
-def t(key: str, lang: str | None = None) -> str:
+def t(key: str, lang: Optional[str] = None) -> str:
     lang = lang or get_lang()
     return (
         translations.get(lang, {}).get(key)
