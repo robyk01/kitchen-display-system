@@ -23,7 +23,7 @@
                     <th>{{ t("actions") }}</th>
                 </tr>
                     {% for order in in_kitchen %}
-                        <tr>
+                        <tr class="order-row-link" data-href="{{ url_for('orders.edit_order', id=order.id) }}">
                             {{ order_row(order, settings, store) }}
                         </tr>
                     {% endfor %}
@@ -52,9 +52,9 @@
                     <th>{{ t("actions") }}</th>
                 </tr>
                     {% for order in ready %}
-                    <tr class=" {% if order in soon_orders %}soon-order{% elif order in late_orders %}late-order{% endif %}">
+                    <tr class="order-row-link" data-href="{{ url_for('orders.edit_order', id=order.id) }}">
                         {{ order_row(order, settings, store) }}
-                    </tr>
+                    </tr>   
                     {% endfor %}
             </table>
         {% elif settings.display_type == 'grid' %}
@@ -81,7 +81,7 @@
                     <th>{{ t("actions") }}</th>
                 </tr>
                     {% for order in delivered %}
-                    <tr>
+                    <tr class="order-row-link" data-href="{{ url_for('orders.edit_order', id=order.id) }}">
                         {{ order_row(order, settings, store) }}
                     </tr>
                     {% endfor %}

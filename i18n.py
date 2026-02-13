@@ -42,6 +42,19 @@ translations = {
         "show_status": "Show Status column",
         "show_total": "Show Total column",
 
+        "general": "General",
+        "shipping": "Shipping",
+        "delivery_time_slot": "Delivery time slot",
+        "delivery_fee": "Delivery fee",
+        "customer_name": "Customer name",
+        "current_status": "Current status",
+        "item_name": "Item name",
+        "price": "Price",
+        "quantity": "Quantity",
+        "order_total": "Order total",
+        "edit_order_title": "Edit order",
+        "of_customer": "of",
+
     },
     "ro": {
         "order": "Comandă",
@@ -83,6 +96,19 @@ translations = {
         "show_payment_method": "Afișare coloană metodă plată",
         "show_status": "Afișare coloană status",
         "show_total": "Afișare coloană preț total",
+
+        "general": "General",
+        "shipping": "Livrare",
+        "delivery_time_slot": "Interval livrare",
+        "delivery_fee": "Taxă livrare",
+        "customer_name": "Nume client",
+        "current_status": "Status curent",
+        "item_name": "Nume produs",
+        "price": "Preț",
+        "quantity": "Cantitate",
+        "order_total": "TOTAL COMANDĂ",
+        "edit_order_title": "Editează comanda",
+        "of_customer": "a clientului",
     }
 }
 

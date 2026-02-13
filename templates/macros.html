@@ -63,7 +63,7 @@
            class="admin-button order-check-button"
            title="{{ t('update_status') }}"
            aria-label="{{ t('update_status') }}">
-            {{ t("update_status") }}
+            ✅
         </a>
     </td>
 {% endmacro %}
@@ -71,7 +71,8 @@
 
 
 {% macro order_card(order, settings) %}
-         <div class="order-card">
+         <div class="order-card order-card-link" data-href="{{ url_for('orders.edit_order', id=order.id) }}"
+>
             <div class="order-card-content">
                 <p class="order-card-title">
                     <span>{{ t("order") }}: #{{ order.id }}</span>

@@ -2,52 +2,56 @@
 
 {% block content %}
 <div class="edit-order-content">
-    <h2>Edit order {{ order.id }} of {{ order.customer_name }}</h2>
+    <a href="{{ url_for('orders.show_orders') }}" class="go-back">
+        {{ t("back_to_orders") }}
+    </a>
+
+    <h2>{{ t("edit_order_title") }} {{ order.id }} {{ t("of_customer") }} {{ order.customer_name }}</h2>
     <form class="edit-order-form" method="POST">
 
         <div class="general-info">
-            <h3>General</h3>
+            <h3>{{ t("general") }}</h3>
             {% if 'delivery_date_and_time' in store.addons %}
-                <p>Delivery method: {{ order.addons.get('delivery_date_and_time', {}).get('delivery_method', None) | title }}</p>
-                <p>Delivery date: {{ order.addons.get('delivery_date_and_time', {}).get('delivery_date', None) }}</p>
-                <p>Delivery time slot: {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_start_time', None) }} - {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_end_time', None) }}</p>
-                <p>Delivery fee: {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_fee', 0) }} RON</p>
+                <p>{{ t("delivery_method") }}: {{ order.addons.get('delivery_date_and_time', {}).get('delivery_method', None) | title }}</p>
+                <p>{{ t("delivery_date") }}: {{ order.addons.get('delivery_date_and_time', {}).get('delivery_date', None) }}</p>
+                <p>{{ t("delivery_time_slot") }}: {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_start_time', None) }} - {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_end_time', None) }}</p>
+                <p>{{ t("delivery_fee") }}: {{ order.addons.get('delivery_date_and_time', {}).get('time_slot_fee', 0) }} RON</p>
             {% endif %}
             <div class="status">
-                <label for="status">Status</label>
+                <label for="status">{{ t("status") }}</label>
                 <select name="status" id="status">
                     {% set options = ["in_kitchen", "ready", "delivered"] %}
                     {% for option in options %}
-                        <option value="{{ option }}">{{ option.title() }}</option>
+                        <option value="{{ option }}">{{ t(option) }}</option>
                     {% endfor %}
                 </select>
-                <p>Current status: {{ order.status }}</p>
+                <p>{{ t("current_status") }}: {{ t(order.status) }}</p>
             </div>
         </div>
 
         <div class="shipping-info">
-            <h3>Shipping</h3>
-            <p>Customer name: {{ order.customer_name }}</p>
-            <p>Payment method:
+            <h3>{{ t("shipping") }}</h3>
+            <p>{{ t("customer_name") }}: {{ order.customer_name }}</p>
+            <p>{{ t("payment_method") }}:
                 {% if order.payment_method == "cod" %}
-                    Cash on delivery
+                    {{ t("cod") }}
                 {% elif order.payment_method == "bacs" %}
-                    Bank transfer
+                    {{ t("bacs") }}
                 {% endif %}
             </p>
         </div>
         
         <div class="submit">
-            <input class="admin-button" id="edit-order-button" type="submit">
+            <input class="admin-button" id="edit-order-button" type="submit" value="{{ t('save') }}">
         </div>
     </form>
 
     <table class="edit-order-items">
         <tr>
-            <th>Item name</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
+            <th>{{ t("item_name") }}</th>
+            <th>{{ t("price") }}</th>
+            <th>{{ t("quantity") }}</th>
+            <th>{{ t("total") }}</th>
         </tr>
         {% for item in order.line_items %}
             <tr>
@@ -57,18 +61,18 @@
                 <td>{{ item.total }} RON</td>
             </tr>
         {% endfor %}
-        {% if order.time_slot_fee  %}
+        {% if order.time_slot_fee %}
             <tr>
                 <td></td>
                 <td></td>
-                <td>Delivery fee:</td>
+                <td>{{ t("delivery_fee") }}:</td>
                 <td>{{ order.time_slot_fee }} RON</td>
             </tr>
         {% endif %}
         <tr>
             <td></td>
             <td></td>
-            <td>ORDER TOTAL:</td>
+            <td>{{ t("order_total") }}:</td>
             <td>{{ order.total }} RON</td>
         </tr>
     </table>
